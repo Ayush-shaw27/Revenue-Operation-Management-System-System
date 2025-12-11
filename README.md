@@ -63,31 +63,47 @@ This project mirrors how sales teams manage and optimize revenue operations:
 
 These patterns map to common workflows in startups and enterprise sales teams, enabling data‑driven decision‑making and operational transparency.
 
-## Screenshots (placeholders)
+## Screenshots
 
-Add real screenshots into `public/` and update the paths below. Suggested minimal descriptions are provided to keep things concise.
+### Dashboard
+![Dashboard](public/Screenshot-2025-12-11-140350.jpg)
+Shows key KPIs like total revenue, active leads, win rate, and pipeline value, along with revenue vs forecast charts and pipeline distribution visualizations for quick health checks.[image:10][file:21]
 
-- Dashboard
-  - ![Dashboard](public/placeholder.jpg)
-  - Shows top KPIs, recent activity, and a performance chart.
+### Leads
+![Leads](public/Screenshot-2025-12-11-140503.jpg)
+Displays a card-based list of leads with qualification status, hotness score, contact details, deal value, and quick email/call actions, plus search and status filters for fast lookup.[image:8][file:21]
 
-- Leads
-  - ![Leads](public/placeholder.jpg)
-  - List of leads with status and quick actions; supports search/filter.
+### Pipeline
+![Pipeline](public/Screenshot-2025-12-11-140452.jpg)
+Provides a stage-based Kanban view of the sales pipeline, showing deals by stage, deal values, win probabilities, and total weighted pipeline so users can track opportunities visually.[image:6][file:21]
 
-- Pipeline
-  - ![Pipeline](public/placeholder.jpg)
-  - Stage‑based view of opportunities; highlights stage distribution.
+### Forecast
+![Forecast](public/Screenshot-2025-12-11-140523.jpg)
+Shows revenue forecast KPIs (current, forecasted, and target revenue) with variance, plus AI revenue forecasting details and charts comparing predicted vs traditional revenue over time.[image:4][file:21]
 
-- Forecast
-  - ![Forecast](public/placeholder.jpg)
-  - Simple forecast chart and projection summary based on historical trends.
+### Forecast – ML Chart
+![Forecast Chart](public/Screenshot-2025-12-11-140604.jpg)
+Visualizes ML revenue forecast curves over months, highlighting predicted trends, confidence, and deviations from baseline to support data-driven planning.[image:5][file:21]
 
-- Admin
-  - ![Admin](public/placeholder.jpg)
-  - Configuration area for stages, roles, and global settings.
+### Admin
+![Admin](public/Screenshot-2025-12-11-140556.jpg)
+Admin panel for managing users, roles, and system health, showing total users, active users, admins, and last login details with edit/delete actions.[image:1][file:21]
 
-You can replace each image path with your actual screenshot filenames, for example `public/dashboard.png`, `public/leads.png`, etc.
+### Admin – Flask / ML Integration
+![Admin Flask Integration](public/Screenshot-2025-12-11-140542.jpg)
+Integration view describing planned Flask API endpoints for AI lead scoring, revenue forecasting, pipeline insights, and data access, including notes about MySQL, SQLAlchemy, CORS, and JWT auth.[image:7][file:21]
+
+### Leads – Add Lead Modal
+![Add Lead](public/Screenshot-2025-12-11-140445.jpg)
+Modal form for adding a new lead with fields for contact info, source, and potential value, enabling quick creation of structured sales opportunities.[image:9][file:21]
+
+### Forecast – Traditional vs Actual
+![Traditional vs Actual Forecast](public/Screenshot-2025-12-11-140359.jpg)
+Chart comparing traditional revenue forecasts against actuals across quarters, helping users evaluate forecast accuracy and performance.[image:3][file:21]
+
+### Dashboard – AI Insights
+![Dashboard AI Insights](public/Screenshot-2025-12-11-140534.jpg)
+Section of the dashboard that surfaces AI-driven insights such as pipeline health, lead response time alerts, and seasonal trends with confidence scores and suggested actions.[image:2][file:21]
 
 ## Getting Started
 
