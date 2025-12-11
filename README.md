@@ -64,14 +64,14 @@ These patterns map to common workflows in startups and enterprise sales teams, e
 
 ### Dashboard
 ![Dashboard](Dashboard.png)
-Shows key KPIs like total revenue, active leads, win rate, and pipeline value, along with revenue vs forecast charts and pipeline distribution visualizations for quick health checks.[image:10][file:21]
+Shows key KPIs like total revenue, active leads, win rate, and pipeline value, along with revenue vs forecast charts and pipeline distribution visualizations for quick health checks.
 ### Dashboard – AI Insights
 ![Dashboard AI Insights](Dashboard2.png)
-Section of the dashboard that surfaces AI-driven insights such as pipeline health, lead response time alerts, and seasonal trends with confidence scores and suggested actions.[image:2][file:21]
+Section of the dashboard that surfaces AI-driven insights such as pipeline health, lead response time alerts, and seasonal trends with confidence scores and suggested actions.
 
 ### Leads
 ![Leads](Leads.png)
-Displays a card-based list of leads with qualification status, hotness score, contact details, deal value, and quick email/call actions, plus search and status filters for fast lookup.[image:8][file:21]
+Displays a card-based list of leads with qualification status, hotness score, contact details, deal value, and quick email/call actions, plus search and status filters for fast lookup.
 ### Leads – Add Lead Modal
 ![Leads](AddLead.png)
 
@@ -79,26 +79,26 @@ Modal form for adding a new lead with fields for contact info, source, and poten
 
 ### Pipeline
 ![Pipeline](Pipeline.png)
-Provides a stage-based Kanban view of the sales pipeline, showing deals by stage, deal values, win probabilities, and total weighted pipeline so users can track opportunities visually.[image:6][file:21]
+Provides a stage-based Kanban view of the sales pipeline, showing deals by stage, deal values, win probabilities, and total weighted pipeline so users can track opportunities visually.
 
 ### Forecast
 ![Forecast](RevenueForcast.png)
-Shows revenue forecast KPIs (current, forecasted, and target revenue) with variance, plus AI revenue forecasting details and charts comparing predicted vs traditional revenue over time.[image:4][file:21]
+Shows revenue forecast KPIs (current, forecasted, and target revenue) with variance, plus AI revenue forecasting details and charts comparing predicted vs traditional revenue over time.
 
 ### Forecast – ML Chart
 ![Forecast Chart](MLRevenueForcast.png)
-Visualizes ML revenue forecast curves over months, highlighting predicted trends, confidence, and deviations from baseline to support data-driven planning.[image:5][file:21]
+Visualizes ML revenue forecast curves over months, highlighting predicted trends, confidence, and deviations from baseline to support data-driven planning.
 ### Forecast – Traditional vs Actual
 ![Traditional vs Actual Forecast](TraditionalvsactualRevenueForcast.png)
-Chart comparing traditional revenue forecasts against actuals across quarters, helping users evaluate forecast accuracy and performance.[image:3][file:21]
+Chart comparing traditional revenue forecasts against actuals across quarters, helping users evaluate forecast accuracy and performance.
 
 ### Admin
 ![Admin](AdminPanel.png)
-Admin panel for managing users, roles, and system health, showing total users, active users, admins, and last login details with edit/delete actions.[image:1][file:21]
+Admin panel for managing users, roles, and system health, showing total users, active users, admins, and last login details with edit/delete actions.
 
 ### Admin – Flask / ML Integration
 ![Admin Flask Integration](AdminPanel2.png)
-Integration view describing planned Flask API endpoints for AI lead scoring, revenue forecasting, pipeline insights, and data access, including notes about MySQL, SQLAlchemy, CORS, and JWT auth.[image:7][file:21]
+Integration view describing planned Flask API endpoints for AI lead scoring, revenue forecasting, pipeline insights, and data access, including notes about MySQL, SQLAlchemy, CORS, and JWT auth.
    
 ## Development Notes
 
@@ -122,7 +122,3 @@ Personal/educational use by default. Add a license of your choice if distributin
 
 - Next.js, Tailwind CSS, Radix UI patterns and community components
 - Placeholder assets in `/public`
-
----
-
-Replace screenshot placeholders and, if you introduce a database, document your schema decisions and migrations under a new section (e.g., `docs/data-model.md`).
