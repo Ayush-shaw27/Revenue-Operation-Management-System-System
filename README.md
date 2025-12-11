@@ -2,7 +2,7 @@
 
 A modern, AI‑assisted Sales CRM built with Next.js App Router and Tailwind CSS. It provides views for Leads, Pipeline, Forecast, Dashboard, and Admin, plus a set of reusable UI components. This README documents what was built, the tools used, how to run it, and how it applies to real‑world scenarios.
 Open the app
-Visit [http://localhost:3000](https://revenue-operation-management-system.vercel.app/)
+Visit [revenue-operation-management-system](https://revenue-operation-management-system.vercel.app/)
 ## Overview
 
 This project implements a multi‑page CRM interface:
