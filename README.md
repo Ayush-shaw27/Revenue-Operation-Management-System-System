@@ -66,7 +66,9 @@ These patterns map to common workflows in startups and enterprise sales teams, e
 ## Screenshots
 
 ### Dashboard
-![Dashboard](public/Screenshot-2025-12-11-140350.jpg)
+![Dashboard](Dashboard.png)
+![Dashboard](Dashboard2.png)
+
 Shows key KPIs like total revenue, active leads, win rate, and pipeline value, along with revenue vs forecast charts and pipeline distribution visualizations for quick health checks.[image:10][file:21]
 
 ### Leads
