@@ -1,7 +1,8 @@
 # Revenue Operation – AI‑Augmented Sales CRM (Next.js)
 
 A modern, AI‑assisted Sales CRM built with Next.js App Router and Tailwind CSS. It provides views for Leads, Pipeline, Forecast, Dashboard, and Admin, plus a set of reusable UI components. This README documents what was built, the tools used, how to run it, and how it applies to real‑world scenarios.
-
+Open the app
+Visit [http://localhost:3000](https://revenue-operation-management-system.vercel.app/)
 ## Overview
 
 This project implements a multi‑page CRM interface:
@@ -102,20 +103,6 @@ Admin panel for managing users, roles, and system health, showing total users, a
 ### Admin – Flask / ML Integration
 ![Admin Flask Integration](AdminPanel2.png)
 Integration view describing planned Flask API endpoints for AI lead scoring, revenue forecasting, pipeline insights, and data access, including notes about MySQL, SQLAlchemy, CORS, and JWT auth.[image:7][file:21]
-
-## Getting Started
-
-1) Install dependencies
-
-   npm install
-
-2) Run the dev server
-
-   npm run dev
-
-3) Open the app
-
-   Visit [http://localhost:3000](https://revenue-operation-management-system.vercel.app/)
    
 ## Development Notes
 
