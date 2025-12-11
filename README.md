@@ -102,21 +102,7 @@ You can replace each image path with your actual screenshot filenames, for examp
 3) Open the app
 
    Visit http://localhost:3000
-
-## Optional: Add a Database
-
-If you want persistence beyond mock data, add a database. Recommended path:
-
-- PostgreSQL + Prisma
-  - Create a PostgreSQL database (local or hosted via Neon/Supabase/Railway)
-  - Add `.env` with `DATABASE_URL="postgres://user:pass@host:port/dbname"`
-  - Define models in `prisma/schema.prisma`
-  - Run `npx prisma migrate dev` and use the client in server components/route handlers
-
-- Quick start for local demos: SQLite
-  - Set `DATABASE_URL="file:./dev.db"`
-  - Prisma can generate and migrate a local SQLite DB; later you can switch to Postgres
-
+   
 ## Development Notes
 
 - UI components live in `components/ui` and are designed to be composed in pages.
