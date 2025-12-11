@@ -115,7 +115,7 @@ Integration view describing planned Flask API endpoints for AI lead scoring, rev
 
 3) Open the app
 
-   Visit http://localhost:3000
+   Visit [http://localhost:3000](https://revenue-operation-management-system.vercel.app/)
    
 ## Development Notes
 
