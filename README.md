@@ -72,19 +72,21 @@ These patterns map to common workflows in startups and enterprise sales teams, e
 Shows key KPIs like total revenue, active leads, win rate, and pipeline value, along with revenue vs forecast charts and pipeline distribution visualizations for quick health checks.[image:10][file:21]
 
 ### Leads
-![Leads](public/Screenshot-2025-12-11-140503.jpg)
+![Leads](Leads.png)
+![Leads](AddLead.png)
+
 Displays a card-based list of leads with qualification status, hotness score, contact details, deal value, and quick email/call actions, plus search and status filters for fast lookup.[image:8][file:21]
 
 ### Pipeline
-![Pipeline](public/Screenshot-2025-12-11-140452.jpg)
+![Pipeline](Pipeline.png)
 Provides a stage-based Kanban view of the sales pipeline, showing deals by stage, deal values, win probabilities, and total weighted pipeline so users can track opportunities visually.[image:6][file:21]
 
 ### Forecast
-![Forecast](public/Screenshot-2025-12-11-140523.jpg)
+![Forecast](RevenueForcast.png)
 Shows revenue forecast KPIs (current, forecasted, and target revenue) with variance, plus AI revenue forecasting details and charts comparing predicted vs traditional revenue over time.[image:4][file:21]
 
 ### Forecast – ML Chart
-![Forecast Chart](public/Screenshot-2025-12-11-140604.jpg)
+![Forecast Chart](ML Revenue Forcast.png)
 Visualizes ML revenue forecast curves over months, highlighting predicted trends, confidence, and deviations from baseline to support data-driven planning.[image:5][file:21]
 
 ### Admin
