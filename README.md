@@ -23,10 +23,6 @@ It uses a component‑driven design with a rich set of reusable UI primitives an
 - State/Utils: TypeScript utilities (`lib/utils.ts`), hooks (`hooks/*`)
 - Build/Config: next.config.mjs, tailwind.config.ts, postcss.config.mjs, tsconfig.json
 
-Optional (recommended for persistence):
-- Database: PostgreSQL (via Prisma) or SQLite for local only
-- ORM: Prisma (type‑safe client)
-
 ## Project Structure
 
 - `app/` – Next.js App Router pages and layouts
