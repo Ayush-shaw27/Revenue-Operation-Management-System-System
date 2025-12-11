@@ -1,4 +1,4 @@
-# OOOS Project – AI‑Augmented Sales CRM (Next.js)
+# Revenue Operation – AI‑Augmented Sales CRM (Next.js)
 
 A modern, AI‑assisted Sales CRM built with Next.js App Router and Tailwind CSS. It provides views for Leads, Pipeline, Forecast, Dashboard, and Admin, plus a set of reusable UI components. This README documents what was built, the tools used, how to run it, and how it applies to real‑world scenarios.
 
@@ -77,6 +77,7 @@ Section of the dashboard that surfaces AI-driven insights such as pipeline healt
 Displays a card-based list of leads with qualification status, hotness score, contact details, deal value, and quick email/call actions, plus search and status filters for fast lookup.[image:8][file:21]
 ### Leads – Add Lead Modal
 ![Leads](AddLead.png)
+
 Modal form for adding a new lead with fields for contact info, source, and potential value, enabling quick creation of structured sales opportunities.[image:9][file:21]
 
 ### Pipeline
