@@ -1,0 +1,4 @@
+id,name,email,hashed_password,role,status,last_login,created_at
+u1,John Smith,admin@revops.pro,$2b$12$IHLt.SZXZyKaXdfM3294Oulb1A/FHE33RX2bLx8Mk7srg3fMtZrl.,admin,active,2024-01-19 14:30,2024-01-01
+u2,Sarah Johnson,manager@revops.pro,$2b$12$9X7QYevSqR6AGcukfjSs1.jAAGeaWw3s6fFa5eHi5DOrVV5BemSEG,manager,active,2024-01-19 14:30,2024-01-01
+u3,Mike Chen,rep@revops.pro,$2b$12$CnpnfMc44Rax0L3/Lb6dkemu.gHTsZF7alLVAzwEb8XhclfbP9SBC,sales-executive,active,2024-01-19 14:30,2024-01-01

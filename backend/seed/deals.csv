@@ -1,0 +1,121 @@
+id,title,company,value,probability,owner,close_date,stage,ai_recommendation,is_anomalous,days_in_stage,last_stage_change,created_at
+d1,TradeFlow Systems Enterprise License,TradeFlow Systems,37123.8,59,Mike Chen,2024-12-15,proposal,,False,1,,2024-12-03
+d2,Innovate.io Automation Platform,Innovate.io,73716.77,63,Sarah Johnson,2024-12-17,proposal,,False,10,,2024-12-02
+d3,HealthBridge Platform Migration,HealthBridge,32090.13,65,Mike Chen,2024-07-05,proposal,,False,3,,2024-05-09
+d4,CloudBase Systems Digital Transformation,CloudBase Systems,51410.03,99,Sarah Johnson,2024-10-05,closed-won,,False,12,,2024-09-10
+d5,NeuroLink Medical Cloud Migration,NeuroLink Medical,31819.62,48,John Smith,2024-12-07,qualification,,False,6,,2024-12-25
+d6,NeuroLink Medical Data Analytics Suite,NeuroLink Medical,47315.94,29,Sarah Johnson,2024-05-01,prospecting,,True,30,,2024-02-02
+d7,StoreSync AI Platform Migration,StoreSync AI,54439.43,97,John Smith,2024-12-19,closed-won,,False,5,,2024-12-03
+d8,PayBridge Data Analytics Suite,PayBridge,12765.86,82,Sarah Johnson,2024-07-20,negotiation,,False,14,,2024-04-17
+d9,PulsePoint Health Security Audit,PulsePoint Health,50167.41,15,John Smith,2024-09-17,closed-lost,,False,11,,2024-06-16
+d10,DataNest Data Analytics Suite,DataNest,32292.97,76,Sarah Johnson,2024-08-18,negotiation,,False,1,,2024-07-25
+d11,CloudNine Platform Digital Transformation,CloudNine Platform,109657.29,48,Sarah Johnson,2024-09-02,qualification,,False,17,,2024-07-27
+d12,ProcessFlow Cloud Migration,ProcessFlow,60667.89,18,Sarah Johnson,2024-03-17,closed-lost,,False,19,,2024-01-02
+d13,SupplyChain360 Security Audit,SupplyChain360,18346.49,76,Sarah Johnson,2024-07-18,negotiation,,False,25,,2024-04-22
+d14,FactoryLine Pro Data Analytics Suite,FactoryLine Pro,155815.16,29,John Smith,2024-11-02,prospecting,,True,29,,2024-08-27
+d15,FactoryLine Pro Digital Transformation,FactoryLine Pro,46080.81,41,John Smith,2024-04-17,qualification,,False,21,,2024-01-26
+d16,TaskForge Integration Project,TaskForge,26604.35,81,Sarah Johnson,2024-09-05,negotiation,,False,11,,2024-06-07
+d17,Acme Corp Security Audit,Acme Corp,103036.73,26,Sarah Johnson,2024-05-20,prospecting,,False,23,,2024-04-14
+d18,ClinicalEdge Digital Transformation,ClinicalEdge,75919.39,55,John Smith,2024-11-11,proposal,,True,28,,2024-10-18
+d19,MetricFlow Integration Project,MetricFlow,20305.15,29,Mike Chen,2024-07-05,prospecting,,False,3,,2024-06-27
+d20,AutoMation Hub Data Analytics Suite,AutoMation Hub,26318.43,48,John Smith,2024-07-06,qualification,,False,13,,2024-04-10
+d21,WorkPilot Digital Transformation,WorkPilot,11171.92,83,Mike Chen,2024-08-01,negotiation,,True,26,,2024-06-21
+d22,TechStart Inc Digital Transformation,TechStart Inc,8762.68,27,Mike Chen,2024-06-25,prospecting,,False,24,,2024-04-26
+d23,SaaSify Platform Migration,SaaSify,44348.01,99,Sarah Johnson,2024-07-15,closed-won,,True,30,,2024-05-19
+d24,MetricFlow Automation Platform,MetricFlow,13166.94,12,Mike Chen,2024-12-10,closed-lost,,False,20,,2024-10-08
+d25,FinEdge Capital Automation Platform,FinEdge Capital,23604.56,48,Mike Chen,2024-09-01,qualification,,False,20,,2024-06-24
+d26,ClinicalEdge Platform Migration,ClinicalEdge,5510.36,21,John Smith,2024-08-03,prospecting,,True,31,,2024-07-07
+d27,CartGenius Cloud Migration,CartGenius,23783.32,98,John Smith,2024-12-24,closed-won,,False,5,,2024-11-16
+d28,MoneyMagnet Co Enterprise License,MoneyMagnet Co,52358.76,90,Mike Chen,2024-12-15,closed-won,,False,3,,2024-10-26
+d29,ProtoTech Industries Integration Project,ProtoTech Industries,40592.58,11,Mike Chen,2024-10-21,closed-lost,,False,2,,2024-08-17
+d30,ProtoTech Industries Platform Migration,ProtoTech Industries,25758.62,13,Sarah Johnson,2024-05-23,closed-lost,,False,4,,2024-03-11
+d31,BuildRight Materials Data Analytics Suite,BuildRight Materials,38783.6,34,Mike Chen,2024-02-02,prospecting,,True,26,,2024-01-09
+d32,SaaSify Digital Transformation,SaaSify,13417.64,99,Mike Chen,2024-06-25,closed-won,,False,23,,2024-04-27
+d33,CloudBase Systems Security Audit,CloudBase Systems,77752.53,39,John Smith,2024-12-05,qualification,,False,24,,2024-11-21
+d34,RetailOps Pro Enterprise License,RetailOps Pro,40492.11,69,John Smith,2024-06-20,proposal,,True,32,,2024-05-05
+d35,SiliconWave Integration Project,SiliconWave,18861.66,79,Sarah Johnson,2024-02-05,negotiation,,False,24,,2024-01-14
+d36,ProcessFlow Digital Transformation,ProcessFlow,102046.46,19,John Smith,2024-06-21,closed-lost,,False,2,,2024-05-21
+d37,ByteForge Labs Enterprise License,ByteForge Labs,13396.73,31,John Smith,2024-08-07,prospecting,,False,5,,2024-06-21
+d38,SmartFactory AI Data Analytics Suite,SmartFactory AI,83030.08,20,Sarah Johnson,2024-12-13,prospecting,,True,26,,2024-12-10
+d39,BioData Analytics Platform Migration,BioData Analytics,6646.65,41,Sarah Johnson,2024-12-22,qualification,,False,12,,2024-09-23
+d40,BuildRight Materials Data Analytics Suite,BuildRight Materials,18288.95,33,John Smith,2024-04-20,prospecting,,False,8,,2024-01-10
+d41,SmartFactory AI Platform Migration,SmartFactory AI,61629.25,78,Sarah Johnson,2024-12-13,negotiation,,True,34,,2024-12-24
+d42,PrecisionWorks Integration Project,PrecisionWorks,25697.06,32,Mike Chen,2024-12-22,prospecting,,True,30,,2024-10-27
+d43,SaaSify Enterprise License,SaaSify,55669.17,96,Sarah Johnson,2024-05-21,closed-won,,False,5,,2024-02-05
+d44,CloudNine Platform Automation Platform,CloudNine Platform,41887.97,64,Sarah Johnson,2024-08-12,proposal,,False,23,,2024-05-16
+d45,FulfillmentHub Automation Platform,FulfillmentHub,82593.37,79,Sarah Johnson,2024-12-20,negotiation,,False,18,,2024-09-10
+d46,MetalCraft Systems Cloud Migration,MetalCraft Systems,51477.78,32,Mike Chen,2024-03-19,prospecting,,False,18,,2024-01-22
+d47,BioData Analytics Digital Transformation,BioData Analytics,20273.61,65,John Smith,2024-05-10,proposal,,False,11,,2024-03-12
+d48,StoreSync AI Security Audit,StoreSync AI,87308.04,76,Sarah Johnson,2024-05-10,negotiation,,False,25,,2024-03-04
+d49,SaaSify Integration Project,SaaSify,53545.11,72,Sarah Johnson,2024-12-19,negotiation,,False,18,,2024-10-14
+d50,PulsePoint Health Integration Project,PulsePoint Health,106034.06,39,Sarah Johnson,2024-05-24,qualification,,False,19,,2024-02-07
+d51,CryptoVault Inc Data Analytics Suite,CryptoVault Inc,50021.23,62,John Smith,2024-06-08,proposal,,False,13,,2024-04-26
+d52,BrandForge Integration Project,BrandForge,29196.15,63,Mike Chen,2024-06-03,proposal,,True,33,,2024-03-24
+d53,SiliconWave Cloud Migration,SiliconWave,94314.13,16,John Smith,2024-06-02,closed-lost,,False,1,,2024-04-26
+d54,IndustrialEdge Cloud Migration,IndustrialEdge,65061.21,67,Sarah Johnson,2024-06-17,proposal,,False,19,,2024-04-26
+d55,DataStream Co Security Audit,DataStream Co,19450.69,55,Mike Chen,2024-06-23,proposal,,False,23,,2024-04-16
+d56,CryptoVault Inc Security Audit,CryptoVault Inc,42275.79,30,Sarah Johnson,2024-06-04,prospecting,,False,22,,2024-04-16
+d57,MedTech Solutions Integration Project,MedTech Solutions,23720.16,22,Sarah Johnson,2024-04-20,prospecting,,False,21,,2024-03-12
+d58,FinEdge Capital Security Audit,FinEdge Capital,16244.24,39,Sarah Johnson,2024-12-14,qualification,,True,27,,2024-12-20
+d59,RetailOps Pro Automation Platform,RetailOps Pro,53727.71,35,Mike Chen,2024-03-27,qualification,,True,29,,2024-02-26
+d60,MoldMaster Pro Platform Migration,MoldMaster Pro,22708.16,63,Sarah Johnson,2024-11-04,proposal,,False,1,,2024-10-19
+d61,FinEdge Capital Automation Platform,FinEdge Capital,61149.66,67,John Smith,2024-04-04,proposal,,True,29,,2024-01-15
+d62,FiscalPath Automation Platform,FiscalPath,89881.14,66,Sarah Johnson,2024-10-08,proposal,,False,22,,2024-08-04
+d63,CryptoVault Inc Cloud Migration,CryptoVault Inc,36282.25,7,Sarah Johnson,2024-06-08,closed-lost,,False,18,,2024-04-15
+d64,MedTech Solutions Data Analytics Suite,MedTech Solutions,12187.68,78,Mike Chen,2024-06-13,negotiation,,True,30,,2024-04-07
+d65,CreditLens Data Analytics Suite,CreditLens,54084.31,70,John Smith,2024-05-23,negotiation,,False,20,,2024-03-13
+d66,CareFlow Systems Cloud Migration,CareFlow Systems,33829.66,99,John Smith,2024-06-09,closed-won,,True,34,,2024-03-18
+d67,WealthLogic Integration Project,WealthLogic,27114.54,38,John Smith,2024-07-18,qualification,,False,9,,2024-05-16
+d68,PriceWatch Security Audit,PriceWatch,38149.64,82,Mike Chen,2024-12-02,negotiation,,False,6,,2024-10-11
+d69,ConsumerPulse Platform Migration,ConsumerPulse,8630.27,23,Sarah Johnson,2024-11-10,prospecting,,False,13,,2024-08-21
+d70,NeuroLink Medical Enterprise License,NeuroLink Medical,18304.87,61,Sarah Johnson,2024-11-15,proposal,,False,15,,2024-08-06
+d71,PayStream Global Platform Migration,PayStream Global,26522.84,71,Mike Chen,2024-05-14,negotiation,,False,1,,2024-02-03
+d72,InsureTech Pro Cloud Migration,InsureTech Pro,21258.99,74,John Smith,2024-06-17,negotiation,,True,27,,2024-04-04
+d73,MoldMaster Pro Data Analytics Suite,MoldMaster Pro,62308.99,46,Mike Chen,2024-12-27,qualification,,False,19,,2024-12-13
+d74,HealthBridge Platform Migration,HealthBridge,40945.51,73,Mike Chen,2024-11-14,negotiation,,False,6,,2024-08-01
+d75,PayBridge Security Audit,PayBridge,28880.14,98,Sarah Johnson,2024-07-02,closed-won,,False,23,,2024-05-19
+d76,Innovate.io Security Audit,Innovate.io,21040.85,10,Sarah Johnson,2024-12-27,closed-lost,,False,4,,2024-09-14
+d77,SaaSify Digital Transformation,SaaSify,199346.31,68,Mike Chen,2024-11-24,proposal,,True,20,,2024-10-26
+d78,FiscalPath Integration Project,FiscalPath,26839.81,67,Sarah Johnson,2024-08-18,proposal,,False,3,,2024-06-04
+d79,HealthBridge Platform Migration,HealthBridge,29310.26,82,Sarah Johnson,2024-12-01,negotiation,,True,26,,2024-09-27
+d80,StoreSync AI Data Analytics Suite,StoreSync AI,87775.75,29,Mike Chen,2024-12-21,prospecting,,False,6,,2024-10-13
+d81,Acme Corp Enterprise License,Acme Corp,66846.33,19,Mike Chen,2024-12-23,closed-lost,,False,5,,2024-11-18
+d82,TradeFlow Systems Enterprise License,TradeFlow Systems,182830.49,33,Sarah Johnson,2024-05-10,prospecting,,True,32,,2024-03-06
+d83,LendSmart AI Platform Migration,LendSmart AI,23389.99,26,Mike Chen,2024-12-25,prospecting,,True,34,,2024-11-10
+d84,HealthBridge Automation Platform,HealthBridge,105592.29,24,Sarah Johnson,2024-04-22,prospecting,,False,16,,2024-01-22
+d85,BrandForge Security Audit,BrandForge,50732.51,69,Mike Chen,2024-03-08,proposal,,False,14,,2024-02-16
+d86,GrowthStack Digital Transformation,GrowthStack,41132.75,42,John Smith,2024-04-01,qualification,,True,29,,2024-03-21
+d87,PrecisionWorks Integration Project,PrecisionWorks,61351.92,20,John Smith,2024-12-18,prospecting,,True,28,,2024-11-03
+d88,DemandFlow Automation Platform,DemandFlow,7634.57,26,Mike Chen,2024-12-14,prospecting,,False,12,,2024-11-26
+d89,DataNest Enterprise License,DataNest,6499.51,38,Sarah Johnson,2024-03-01,qualification,,True,32,,2024-01-03
+d90,Acme Corp Enterprise License,Acme Corp,12769.01,92,Mike Chen,2024-08-02,closed-won,,False,22,,2024-05-18
+d91,IndustrialEdge Data Analytics Suite,IndustrialEdge,22016.29,32,John Smith,2024-04-03,prospecting,,False,20,,2024-01-18
+d92,LendSmart AI Enterprise License,LendSmart AI,140501.2,67,Mike Chen,2024-12-02,proposal,,False,12,,2024-09-01
+d93,InsightEngine Enterprise License,InsightEngine,13759.22,56,John Smith,2024-07-02,proposal,,True,34,,2024-05-20
+d94,VitalSign AI Digital Transformation,VitalSign AI,35755.26,63,Sarah Johnson,2024-05-23,proposal,,False,19,,2024-03-21
+d95,SupplyChain360 Integration Project,SupplyChain360,11851.54,47,John Smith,2024-03-10,qualification,,True,34,,2024-02-01
+d96,PlatformHQ Enterprise License,PlatformHQ,46407.59,29,Sarah Johnson,2024-12-12,prospecting,,False,9,,2024-12-06
+d97,ProcessFlow Cloud Migration,ProcessFlow,77161.13,46,Sarah Johnson,2024-02-02,qualification,,True,30,,2024-01-13
+d98,FinEdge Capital Integration Project,FinEdge Capital,32880.4,75,Mike Chen,2024-06-07,negotiation,,False,3,,2024-04-07
+d99,GrowthStack Digital Transformation,GrowthStack,28759.61,55,John Smith,2024-09-20,proposal,,False,10,,2024-08-09
+d100,LendSmart AI Platform Migration,LendSmart AI,5000,38,John Smith,2024-06-05,qualification,,True,33,,2024-03-18
+d101,TradeFlow Systems Data Analytics Suite,TradeFlow Systems,63637.81,26,Mike Chen,2024-09-17,prospecting,,False,4,,2024-08-13
+d102,CloudNine Platform Digital Transformation,CloudNine Platform,104379.7,79,Mike Chen,2024-12-22,negotiation,,True,32,,2024-09-23
+d103,CryptoVault Inc Cloud Migration,CryptoVault Inc,33579.4,45,Mike Chen,2024-04-13,qualification,,False,15,,2024-02-06
+d104,CareFlow Systems Platform Migration,CareFlow Systems,23940.22,20,John Smith,2024-10-10,prospecting,,False,24,,2024-07-01
+d105,CloudBase Systems Enterprise License,CloudBase Systems,24168.17,98,Sarah Johnson,2024-09-10,closed-won,,False,21,,2024-06-20
+d106,SiliconWave Platform Migration,SiliconWave,33721.56,15,Sarah Johnson,2024-09-12,closed-lost,,False,14,,2024-06-22
+d107,TradeFlow Systems Integration Project,TradeFlow Systems,23689.56,84,Mike Chen,2024-07-01,negotiation,,False,13,,2024-06-27
+d108,MedTech Solutions Platform Migration,MedTech Solutions,51868.56,97,Mike Chen,2024-10-20,closed-won,,False,7,,2024-09-03
+d109,CyberShield Security Cloud Migration,CyberShield Security,32481.72,58,John Smith,2024-05-06,proposal,,True,29,,2024-02-06
+d110,ProtoTech Industries Integration Project,ProtoTech Industries,51579.03,27,Sarah Johnson,2024-05-13,prospecting,,True,27,,2024-02-17
+d111,MoneyMagnet Co Enterprise License,MoneyMagnet Co,121978.66,69,John Smith,2024-11-11,proposal,,False,6,,2024-09-23
+d112,IndustrialEdge Data Analytics Suite,IndustrialEdge,19995.07,24,Sarah Johnson,2024-11-11,prospecting,,False,2,,2024-09-14
+d113,InsureTech Pro Cloud Migration,InsureTech Pro,100378.3,28,Sarah Johnson,2024-11-06,prospecting,,False,19,,2024-09-10
+d114,HealthSync Pro Data Analytics Suite,HealthSync Pro,10364.14,41,John Smith,2024-04-14,qualification,,False,20,,2024-02-02
+d115,CartGenius Integration Project,CartGenius,14009.01,56,John Smith,2024-08-25,proposal,,False,16,,2024-06-13
+d116,NexGen Software Automation Platform,NexGen Software,147687.19,97,Sarah Johnson,2024-03-12,closed-won,,False,12,,2024-01-03
+d117,BioData Analytics Platform Migration,BioData Analytics,29225.07,99,Mike Chen,2024-05-02,closed-won,,False,22,,2024-03-01
+d118,ScaleUp Tools Platform Migration,ScaleUp Tools,16753.21,31,John Smith,2024-12-17,prospecting,,True,32,,2024-12-18
+d119,CodePilot AI Cloud Migration,CodePilot AI,137486.65,95,Sarah Johnson,2024-06-25,closed-won,,False,15,,2024-05-09
+d120,PayStream Global Security Audit,PayStream Global,107830.74,83,Mike Chen,2024-04-24,negotiation,,False,17,,2024-03-20
