@@ -1,14 +1,6 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
-# ---------------------------------------------------------------------------
-# Token re-export for backwards compatibility (schema now lives in backend.auth)
-# ---------------------------------------------------------------------------
-from backend.auth import Token  # noqa: F401
-
-# ---------------------------------------------------------------------------
-# Core health / scoring models
-# ---------------------------------------------------------------------------
 class HealthResponse(BaseModel):
     status: str
     version: str
@@ -26,14 +18,15 @@ class LeadScoreRequest(BaseModel):
 
 class LeadScoreResponse(BaseModel):
     score: int
-    label: str  # Hot, Warm, Cool, Cold
+    label: str
     conversion_probability: float
     confidence: int
     factors: List[str]
+    top_feature_contributions: Optional[List[dict]] = None
 
 class RevenueForecastRequest(BaseModel):
     timeframe: str = Field(default="monthly", json_schema_extra={"example": "monthly"})
-    model_type: str = Field(default="random-forest", json_schema_extra={"example": "random-forest"})
+    model_type: str = Field(default="ridge", json_schema_extra={"example": "ridge"})
     periods_ahead: Optional[int] = Field(default=3, json_schema_extra={"example": 3})
 
 class ForecastDataPoint(BaseModel):
@@ -48,42 +41,46 @@ class ForecastDataPoint(BaseModel):
 class RevenueForecastResponse(BaseModel):
     timeframe: str
     model_type: str
-    accuracy: int
+    accuracy: float
     model_description: str
     data: List[ForecastDataPoint]
     traditional_total: float
     ml_projected_total: float
     variance_percentage: float
+    mae: Optional[float] = None
+    rmse: Optional[float] = None
+    r2: Optional[float] = None
 
 class InsightItem(BaseModel):
     id: str
-    type: str  # positive, warning, neutral
+    type: str
     title: str
     description: str
-    confidence: int
+    confidence: float
     actionable: bool
     metric_affected: str
+    evidence: Optional[str] = None
+    recommendation: Optional[str] = None
 
 class PipelineInsightsResponse(BaseModel):
-    pipeline_health_score: int
+    pipeline_health_score: float
     win_rate_estimate: float
+    total_pipeline_value: float
+    total_deals: int
     insights: List[InsightItem]
 
-# ---------------------------------------------------------------------------
-# Leads
-# ---------------------------------------------------------------------------
 class LeadCreate(BaseModel):
     name: str
-    email: Optional[str] = ""
-    phone: Optional[str] = ""
+    email: str = ""
+    phone: str = ""
     company: str
     status: str = "new"
     source: str = "Website"
     value: float = 0
-    industry: Optional[str] = "Technology"
-    company_size: Optional[str] = "Mid-Market"
-    touchpoints: Optional[int] = 3
-    notes: Optional[str] = ""
+    industry: str = "Technology"
+    company_size: str = "Mid-Market"
+    touchpoints: int = 3
+    notes: str = ""
 
 class LeadUpdate(BaseModel):
     name: Optional[str] = None
@@ -109,16 +106,13 @@ class LeadResponse(BaseModel):
     value: float
     industry: str
     company_size: str
+    touchpoints: int
+    notes: str
     created_at: str
     ai_score: Optional[int] = None
     ai_label: Optional[str] = None
     ai_factors: Optional[List[str]] = None
-    touchpoints: Optional[int] = None
-    notes: Optional[str] = ""
 
-# ---------------------------------------------------------------------------
-# Deals
-# ---------------------------------------------------------------------------
 class DealCreate(BaseModel):
     title: str
     company: str
@@ -144,34 +138,28 @@ class DealResponse(BaseModel):
     value: float
     probability: int
     owner: str
-    close_date: Optional[str] = None
+    close_date: Optional[str]
     stage: str
-    ai_recommendation: Optional[str] = None
-    is_anomalous: Optional[bool] = False
-    days_in_stage: Optional[int] = 0
-    created_at: Optional[str] = None
+    ai_recommendation: Optional[str]
+    is_anomalous: bool
+    days_in_stage: int
+    created_at: str
 
-# ---------------------------------------------------------------------------
-# Activities
-# ---------------------------------------------------------------------------
 class ActivityCreate(BaseModel):
     deal_id: Optional[str] = None
     lead_id: Optional[str] = None
-    type: str = "note"
+    type: str
     content: str
 
 class ActivityResponse(BaseModel):
     id: str
-    deal_id: Optional[str] = None
-    lead_id: Optional[str] = None
+    deal_id: Optional[str]
+    lead_id: Optional[str]
     type: str
     author: str
     content: str
     created_at: str
 
-# ---------------------------------------------------------------------------
-# Accounts / Churn
-# ---------------------------------------------------------------------------
 class AccountResponse(BaseModel):
     id: str
     name: str
@@ -183,24 +171,15 @@ class AccountResponse(BaseModel):
     renewal_in_days: int
     health_score: float
 
-class ChurnFactor(BaseModel):
-    factor: str
-    direction: str
-    weight: float
-    rank: int
-
 class ChurnPredictionResponse(BaseModel):
     account_id: str
     account_name: str
     risk_score: float
     tier: str
     confidence: int
-    top_factors: List[ChurnFactor]
+    top_factors: List[dict]
     model_version: str
 
-# ---------------------------------------------------------------------------
-# Anomaly detection
-# ---------------------------------------------------------------------------
 class AnomalyDetectionResponse(BaseModel):
     deal_id: str
     deal_title: str
@@ -214,27 +193,13 @@ class AnomalyDetectionResponse(BaseModel):
     reasons: List[str]
     model_version: str
 
-# ---------------------------------------------------------------------------
-# Next best action
-# ---------------------------------------------------------------------------
-class ActionRecommendation(BaseModel):
-    action_id: str
-    action: str
-    channel: str
-    priority: float
-    rationale: str
-    rank: Optional[int] = None
-
 class NextBestActionResponse(BaseModel):
     deal_id: str
     deal_title: str
     company: str
     stage: str
-    recommendations: List[ActionRecommendation]
+    recommendations: List[dict]
 
-# ---------------------------------------------------------------------------
-# Alerts / Notifications
-# ---------------------------------------------------------------------------
 class AlertResponse(BaseModel):
     id: str
     kind: str
@@ -254,9 +219,6 @@ class NotificationResponse(BaseModel):
     read: bool
     created_at: str
 
-# ---------------------------------------------------------------------------
-# Users
-# ---------------------------------------------------------------------------
 class UserCreate(BaseModel):
     name: str
     email: str
@@ -279,17 +241,17 @@ class UserResponse(BaseModel):
     last_login: Optional[str] = None
     created_at: Optional[str] = None
 
-# ---------------------------------------------------------------------------
-# Analytics
-# ---------------------------------------------------------------------------
+class AnalyticsFunnelResponse(BaseModel):
+    by: str
+    funnel: List[dict]
+
+class AnalyticsCohortsResponse(BaseModel):
+    cohorts: List[dict]
+
 class FunnelItem(BaseModel):
     name: str
     value: int
     color: Optional[str] = None
-
-class AnalyticsFunnelResponse(BaseModel):
-    by: str
-    funnel: List[FunnelItem]
 
 class CohortItem(BaseModel):
     cohort: str
@@ -297,16 +259,10 @@ class CohortItem(BaseModel):
     converted: int
     conversion_rate: float
 
-class AnalyticsCohortsResponse(BaseModel):
-    cohorts: List[CohortItem]
-
-# ---------------------------------------------------------------------------
-# Model registry
-# ---------------------------------------------------------------------------
 class ModelRegistryEntry(BaseModel):
     name: str
     version: str
     trained_at: str
     accuracy: float
     kind: str
-    notes: str = ""
+    notes: str

@@ -1,123 +1,138 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import GradientBoostingRegressor
-from typing import Dict, Any, List
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from typing import Dict, Any, List, Optional
+
+from backend import data_store as ds
+
 
 class RevenueForecastModel:
     def __init__(self):
-        # Base historical timelines
-        self.monthly_history = [
-            {"period": "Jan", "actual": 145000, "target": 150000},
-            {"period": "Feb", "actual": 162000, "target": 160000},
-            {"period": "Mar", "actual": 158000, "target": 170000},
-            {"period": "Apr", "actual": 189000, "target": 180000},
-            {"period": "May", "actual": 195000, "target": 190000},
-            {"period": "Jun", "actual": 0, "target": 200000},
-            {"period": "Jul", "actual": 0, "target": 210000},
-            {"period": "Aug", "actual": 0, "target": 220000},
-        ]
+        self.model = None
+        self.is_trained = False
+        self._train()
 
-        self.quarterly_history = [
-            {"period": "Q1 2024", "actual": 465000, "target": 480000},
-            {"period": "Q2 2024", "actual": 384000, "target": 570000},
-            {"period": "Q3 2024", "actual": 0, "target": 630000},
-            {"period": "Q4 2024", "actual": 0, "target": 680000},
-        ]
+    def _train(self):
+        deals = ds.get_deals()
+        closed_won = [d for d in deals if d.get("stage") == "closed-won" and d.get("value", 0) > 0]
+        if len(closed_won) < 5:
+            self.is_trained = False
+            return
 
-        self.yearly_history = [
-            {"period": "2022", "actual": 1850000, "target": 1900000},
-            {"period": "2023", "actual": 2150000, "target": 2200000},
-            {"period": "2024", "actual": 849000, "target": 2360000},
-            {"period": "2025", "actual": 0, "target": 2600000},
-        ]
+        closed_won_sorted = sorted(closed_won, key=lambda d: d.get("created_at", ""))
+        values = [d["value"] for d in closed_won_sorted]
+        X = np.arange(len(values)).reshape(-1, 1)
+        y = np.array(values)
 
-    def refit(self) -> None:
-        """Refit model from DB closed-won deals."""
-        from backend.data_store import get_revenue_history
-        # Placeholder: load from DB when data_store fully wired
-        pass
+        self.model = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+        self.model.fit(X, y)
+        preds = self.model.predict(X)
+        self._mae = float(mean_absolute_error(y, preds))
+        self._rmse = float(np.sqrt(mean_squared_error(y, preds)))
+        self._r2 = float(r2_score(y, preds))
+        self.is_trained = True
 
     def forecast(self, timeframe: str = "monthly", model_type: str = "ridge") -> Dict[str, Any]:
-        if timeframe == "quarterly":
-            dataset = [dict(d) for d in self.quarterly_history]
-            base_growth = 1.15
-        elif timeframe == "yearly":
-            dataset = [dict(d) for d in self.yearly_history]
-            base_growth = 1.18
-        else:
-            timeframe = "monthly"
-            dataset = [dict(d) for d in self.monthly_history]
-            base_growth = 1.08
+        deals = ds.get_deals()
+        closed_won = [d for d in deals if d.get("stage") == "closed-won" and d.get("value", 0) > 0]
+        closed_won_sorted = sorted(closed_won, key=lambda d: d.get("created_at", ""))
 
-        known_actuals = [d["actual"] for d in dataset if d["actual"] > 0]
-        n_known = len(known_actuals)
+        if len(closed_won_sorted) < 3:
+            return self._empty_forecast(timeframe, model_type)
 
+        values = [d["value"] for d in closed_won_sorted]
+        n_known = len(values)
         X_train = np.arange(n_known).reshape(-1, 1)
-        y_train = np.array(known_actuals)
+        y_train = np.array(values)
 
-        # Build regressors based on requested model
         if model_type == "linear":
             reg = LinearRegression()
             reg.fit(X_train, y_train)
-            accuracy = 81
-            desc = "Parametric Ordinary Least Squares regression based on historical revenue run-rate"
-            noise_factor = 0.03
+            desc = "Ordinary Least Squares regression"
+            noise_factor = 0.05
         elif model_type == "gradient-boosting":
             reg = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
             reg.fit(X_train, y_train)
-            accuracy = 93
-            desc = "Gradient-Boosted Regressor with adaptive seasonal weights"
-            noise_factor = 0.015
-        else:  # ridge default
-            model_type = "ridge"
+            desc = "Gradient-Boosted Regressor"
+            noise_factor = 0.03
+        else:
             reg = Ridge(alpha=1.0)
             reg.fit(X_train, y_train)
-            accuracy = 88
-            desc = "Regularized Ridge regression balancing baseline growth and pipeline velocity"
-            noise_factor = 0.02
+            desc = "Regularized Ridge regression"
+            noise_factor = 0.04
+
+        known_mae = None
+        if n_known >= 3:
+            train_preds = reg.predict(X_train)
+            known_mae = float(mean_absolute_error(y_train, train_preds))
 
         output_points = []
-        total_trad = 0.0
-        total_ml = 0.0
-
-        for i, item in enumerate(dataset):
+        for i, val in enumerate(values):
             pred_idx = np.array([[i]])
-            trend_val = float(reg.predict(pred_idx)[0]) if i < n_known else float(reg.predict(pred_idx)[0] * (1.0 + (i - n_known + 1) * 0.03))
-
-            # Traditional baseline forecast (simpler run-rate)
-            trad_val = float(round(item["target"] * 0.96 + (i * 2000)))
-
-            if item["actual"] > 0:
-                ml_val = float(item["actual"])
-            else:
-                ml_val = float(max(round(trend_val), trad_val * 0.95))
-
-            upper = round(ml_val * (1.0 + noise_factor * 2.5))
-            lower = round(ml_val * (1.0 - noise_factor * 2.5))
-            conf = int(np.clip(accuracy - (i * 1.2), 65, 96))
-
+            trend_val = float(reg.predict(pred_idx)[0])
+            actual = float(val)
+            upper = round(actual * (1.0 + noise_factor * 2.5), 2)
+            lower = round(actual * (1.0 - noise_factor * 2.5), 2)
+            conf = int(np.clip(90 - (i * 1.5), 70, 96))
             output_points.append({
-                "period": item["period"],
-                "actual": float(item["actual"]),
-                "traditional": trad_val,
-                "mlForecast": ml_val,
+                "period": f"Period {i+1}",
+                "actual": actual,
+                "traditional": round(trend_val, 2),
+                "mlForecast": round(trend_val, 2),
                 "confidence": conf,
                 "lower_bound": lower,
                 "upper_bound": upper,
             })
 
-            total_trad += trad_val
-            total_ml += ml_val
+        last_idx = n_known - 1
+        for i in range(1, 4):
+            pred_idx = np.array([[last_idx + i]])
+            forecast_val = float(reg.predict(pred_idx)[0])
+            forecast_val = max(forecast_val, 0)
+            upper = round(forecast_val * (1.0 + noise_factor * 2.5), 2)
+            lower = round(max(0, forecast_val * (1.0 - noise_factor * 2.5)), 2)
+            conf = int(np.clip(85 - (i * 2), 65, 92))
+            output_points.append({
+                "period": f"Forecast {i}",
+                "actual": 0,
+                "traditional": round(forecast_val, 2),
+                "mlForecast": round(forecast_val, 2),
+                "confidence": conf,
+                "lower_bound": lower,
+                "upper_bound": upper,
+            })
 
-        variance_pct = round(((total_ml - total_trad) / total_trad) * 100, 1)
+        total_actual = sum(float(d["actual"]) for d in output_points if d["actual"] > 0)
+        total_forecast = sum(float(d["mlForecast"]) for d in output_points)
 
+        result = {
+            "timeframe": timeframe,
+            "model_type": model_type,
+            "accuracy": round(float(self._r2 * 100), 1) if hasattr(self, '_r2') else 0.0,
+            "model_description": desc,
+            "data": output_points,
+            "traditional_total": round(total_forecast, 2),
+            "ml_projected_total": round(total_forecast, 2),
+            "variance_percentage": 0.0,
+        }
+        if known_mae is not None:
+            result["mae"] = round(known_mae, 2)
+            result["rmse"] = round(float(np.sqrt(mean_squared_error(y_train, reg.predict(X_train)))), 2)
+            result["r2"] = round(float(r2_score(y_train, reg.predict(X_train))), 3)
+        return result
+
+    def _empty_forecast(self, timeframe: str, model_type: str) -> Dict[str, Any]:
         return {
             "timeframe": timeframe,
             "model_type": model_type,
-            "accuracy": accuracy,
-            "model_description": desc,
-            "data": output_points,
-            "traditional_total": round(total_trad, 2),
-            "ml_projected_total": round(total_ml, 2),
-            "variance_percentage": variance_pct,
+            "accuracy": 0.0,
+            "model_description": "Insufficient data for training",
+            "data": [],
+            "traditional_total": 0,
+            "ml_projected_total": 0,
+            "variance_percentage": 0,
+            "mae": None,
+            "rmse": None,
+            "r2": None,
         }
