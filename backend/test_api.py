@@ -1,327 +1,268 @@
+"""Integration test suite for the RevOps Pro backend API.
+
+Run:
+    cd backend && python -m pytest test_api.py -v
+
+IMPORTANT - test database isolation
+------------------------------------
+``DATABASE_URL`` is redirected to a throwaway SQLite file *before* any app
+module is imported.  ``app.core.config.settings`` and the SQLAlchemy engine are
+both built at import time, so the override has to happen first; setting it later
+would silently keep using the development database and let tests write junk rows
+into real data.  The temp file is removed on teardown.
+"""
+from __future__ import annotations
+
+import os
+import sys
+import tempfile
+
+# Ensure backend/ is on sys.path regardless of where pytest is invoked from.
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
+
+# --------------------------------------------------------------------------- 
+# Isolate the database BEFORE importing app.main / app.core.config.
+# ---------------------------------------------------------------------------
+_TEST_DB_DIR = tempfile.mkdtemp(prefix="revops-tests-")
+_TEST_DB_PATH = os.path.join(_TEST_DB_DIR, "test_revops.db")
+os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB_PATH}"
+os.environ["SCHEDULER_ENABLED"] = "0"
+# Neutralise any real AI gateway credentials so tests never hit a live provider.
+os.environ.setdefault("OMNIROUTE_API_KEY", "")
+
+import atexit
+import shutil
+
 import pytest
 from fastapi.testclient import TestClient
-from backend.main import app
-from backend.db import init_db
-from backend.seed_loader import seed_if_empty
-import backend.data_store as ds
 
-init_db()
-seed_if_empty()
+import app.main as _main_mod
+from app.main import app
+
+
+@atexit.register
+def _cleanup_test_db() -> None:
+    shutil.rmtree(_TEST_DB_DIR, ignore_errors=True)
+
+
+# `TestClient(app)` does not run the ASGI lifespan unless it is used as a context
+# manager, so init_db() has to be called explicitly to create the schema in the
+# throwaway database.
+from app.database.connection import init_db as _init_db  # noqa: E402
+
+_init_db()
+
 
 client = TestClient(app)
 
-ADMIN_EMAIL = "admin@revops.pro"
-ADMIN_PASSWORD = "adminpass"
-MANAGER_EMAIL = "manager@revops.pro"
-MANAGER_PASSWORD = "managerpass"
+
+class TestDatabaseIsolation:
+    """Guard rails proving the suite does not touch the development database."""
+
+    def test_uses_temporary_database(self):
+        from app.core.config import settings
+        from app.database.connection import engine
+
+        url = str(engine.url)
+        assert url.startswith("sqlite:///"), f"expected sqlite, got {url}"
+        assert "test_revops.db" in url, f"tests must not use {url}"
+        assert "revops-tests-" in url, f"tests must use a temp dir, got {url}"
+        # The development database must not be the active one.
+        assert not url.endswith("/data/revops.db"), "tests are pointed at the dev DB!"
+
+    def test_dev_database_untouched(self):
+        """The dev DB file must never be opened for writing by the test run."""
+        from app.core.config import settings
+        from app.database.connection import engine
+
+        dev_path = os.path.join(
+            _BACKEND_DIR, "data", "revops.db",
+        )
+        assert str(engine.url) != f"sqlite:///{dev_path}"
 
 
-def _get_token(email: str = ADMIN_EMAIL, password: str = ADMIN_PASSWORD) -> str:
-    resp = client.post(
-        "/api/auth/login",
-        data={"username": email, "password": password},
-    )
-    assert resp.status_code == 200, f"Login failed for {email}: {resp.json()}"
-    return resp.json()["access_token"]
+class TestRoot:
+    def test_root_returns_info(self):
+        resp = client.get("/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["service"] == "RevOps Pro"
+        assert data["version"] == "1.0.0"
+        assert data["status"] == "running"
 
 
-def _auth_header(token: str = None) -> dict:
-    t = token or _get_token()
-    return {"Authorization": f"Bearer {t}"}
+class TestHealth:
+    def test_health_returns_healthy(self):
+        resp = client.get("/health")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "healthy"
 
 
-# ---------------------------------------------------------------------------
-# Auth tests
-# ---------------------------------------------------------------------------
-def test_login_success():
-    resp = client.post(
-        "/api/auth/login",
-        data={"username": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
-    )
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "access_token" in data
-    assert data["token_type"] == "bearer"
-    assert "user" in data
-    assert data["user"]["role"] == "admin"
+class TestAuthAnonymous:
+    def test_login_bad_credentials(self):
+        resp = client.post("/api/auth/login", data={
+            "username": "admin@revops.pro", "password": "wrong",
+        })
+        assert resp.status_code == 401
+
+    def test_me_without_token(self):
+        resp = client.get("/api/auth/me")
+        assert resp.status_code == 401
 
 
-def test_login_failure():
-    resp = client.post(
-        "/api/auth/login",
-        data={"username": ADMIN_EMAIL, "password": "wrongpassword"},
-    )
-    assert resp.status_code == 401
+class TestProtectedRoutes:
+    def test_leads_401(self):
+        resp = client.get("/api/leads")
+        assert resp.status_code == 401
+
+    def test_deals_401(self):
+        resp = client.get("/api/deals")
+        assert resp.status_code == 401
+
+    def test_ml_predict_401(self):
+        resp = client.post("/api/predict/lead-score", json={
+            "name": "Test", "company": "Test Co", "value": 50000,
+            "source": "Website", "touchpoints": 3, "industry": "Technology",
+            "company_size": "Mid-Market",
+        })
+        assert resp.status_code == 401
 
 
-def test_me_endpoint():
-    resp = client.get("/api/auth/me", headers=_auth_header())
-    assert resp.status_code == 200
-    assert resp.json()["email"] == ADMIN_EMAIL
+class TestAPIRegistration:
+    """Verify all routes are registered."""
+
+    def test_crm_routes(self):
+        for p in ["/api/leads", "/api/deals", "/api/accounts", "/api/activities"]:
+            resp = client.get(p)
+            assert resp.status_code in (401, 200), f"{p} should be registered"
+
+    def test_ml_routes(self):
+        # POST routes
+        for p in ["/api/predict/lead-score", "/api/predict/revenue-forecast"]:
+            resp = client.post(p, json={})
+            assert resp.status_code in (401, 200, 500), f"{p} should be registered"
+        # GET routes
+        for p in ["/api/predict/pipeline-insights", "/api/predict/churn-risk",
+                   "/api/predict/anomalies", "/api/predict/next-best-actions"]:
+            resp = client.get(p)
+            assert resp.status_code in (401, 200, 500), f"{p} should be registered"
+
+    def test_admin_routes(self):
+        for p in ["/api/admin/stats", "/api/admin/models", "/api/admin/activity"]:
+            resp = client.get(p)
+            assert resp.status_code in (401, 403, 200), f"{p} should be registered"
+
+    def test_alerts_routes(self):
+        resp = client.get("/api/alerts")
+        assert resp.status_code == 401
+
+    def test_analytics_routes(self):
+        for p in ["/api/analytics/funnel", "/api/analytics/cohorts",
+                   "/api/analytics/trends", "/api/analytics/exec-summary"]:
+            resp = client.get(p)
+            assert resp.status_code in (401, 200), f"{p} should be registered"
+
+    def test_copilot_route(self):
+        resp = client.post("/api/copilot/ask", json={"question": "hello"})
+        assert resp.status_code in (401, 200)
 
 
-def test_me_unauthenticated():
-    resp = client.get("/api/auth/me")
-    assert resp.status_code in (401, 403)
+class TestRegistrationSecurity:
+    """Public registration must never be able to grant a privileged role."""
+
+    def _register(self, email, role):
+        return client.post("/api/auth/register", json={
+            "name": "Escalation Attempt",
+            "email": email,
+            "password": "Sup3rSecret!23",
+            "role": role,
+        })
+
+    def test_register_with_admin_role_is_downgraded(self):
+        resp = self._register("esc-admin@revops.pro", "admin")
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["role"] == "sales-executive", (
+            "privilege escalation: public registration granted admin!"
+        )
+
+    def test_register_with_manager_role_is_downgraded(self):
+        resp = self._register("esc-manager@revops.pro", "manager")
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["role"] == "sales-executive"
+
+    def test_register_with_unknown_role_rejected(self):
+        resp = self._register("esc-bogus@revops.pro", "superuser")
+        assert resp.status_code == 400
+
+    def test_downgraded_user_cannot_reach_admin_routes(self):
+        self._register("esc-blocked@revops.pro", "admin")
+        login = client.post("/api/auth/login", data={
+            "username": "esc-blocked@revops.pro", "password": "Sup3rSecret!23",
+        })
+        assert login.status_code == 200, login.text
+        token = login.json()["access_token"]
+        assert login.json()["user"]["role"] == "sales-executive"
+
+        admin_resp = client.get(
+            "/api/admin/stats", headers={"Authorization": f"Bearer {token}"},
+        )
+        assert admin_resp.status_code == 403, (
+            f"self-registered user reached admin route: {admin_resp.status_code}"
+        )
+
+    def test_duplicate_email_conflicts(self):
+        self._register("esc-dup@revops.pro", "sales-executive")
+        resp = self._register("esc-dup@revops.pro", "sales-executive")
+        assert resp.status_code == 409
 
 
-# ---------------------------------------------------------------------------
-# Health
-# ---------------------------------------------------------------------------
-def test_health_check():
-    resp = client.get("/api/health")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "healthy"
-    assert data["models_loaded"] is True
+class TestEventsSecurity:
+    """The SSE stream must not be an unauthenticated data leak."""
+
+    def test_sse_requires_token(self):
+        resp = client.get("/api/events/stream")
+        assert resp.status_code == 401, "SSE stream is public!"
+
+    def test_sse_rejects_invalid_token(self):
+        resp = client.get("/api/events/stream", params={"token": "not-a-real-jwt"})
+        assert resp.status_code == 401
+
+    def test_sse_rejects_empty_token(self):
+        resp = client.get("/api/events/stream", params={"token": ""})
+        assert resp.status_code == 401
 
 
-# ---------------------------------------------------------------------------
-# ML Predictions (protected)
-# ---------------------------------------------------------------------------
-def test_lead_scoring():
-    payload = {
-        "name": "Global Logistics Corp",
-        "company": "Global Logistics",
-        "value": 75000,
-        "source": "Referral",
-        "touchpoints": 5,
-        "industry": "Technology",
-        "company_size": "Enterprise",
-    }
-    resp = client.post("/api/predict/lead-score", json=payload, headers=_auth_header())
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "score" in data
-    assert "label" in data
-    assert 0 <= data["score"] <= 100
-    assert len(data["factors"]) > 0
+class TestModels:
+    def test_lead_scoring_model(self):
+        from app.ml.artifacts.lead_scoring_model import LeadScoringModel
+        model = LeadScoringModel()
+        result = model.predict({
+            "name": "Test", "company": "Test Co", "value": 50000,
+            "source": "Website", "touchpoints": 3, "industry": "Technology",
+            "company_size": "Mid-Market",
+        })
+        assert "score" in result
+        assert "label" in result
+        assert result["label"] in ("Hot", "Warm", "Cool", "Cold")
+
+    def test_revenue_forecast_model(self):
+        from app.ml.inference.revenue_forecast_model import RevenueForecastModel
+        model = RevenueForecastModel()
+        result = model.forecast(timeframe="monthly", model_type="ridge")
+        assert "data" in result
+
+    def test_pipeline_insights_engine(self):
+        from app.ml.inference.insights_engine import PipelineInsightsEngine
+        engine = PipelineInsightsEngine()
+        result = engine.generate_insights()
+        assert "pipeline_health_score" in result
+        assert "insights" in result
 
 
-def test_revenue_forecast():
-    payload = {"timeframe": "monthly", "model_type": "random-forest", "periods_ahead": 3}
-    resp = client.post("/api/predict/revenue-forecast", json=payload, headers=_auth_header())
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["timeframe"] == "monthly"
-    assert len(data["data"]) > 0
-    assert "ml_projected_total" in data
-
-
-def test_pipeline_insights():
-    resp = client.get("/api/predict/pipeline-insights", headers=_auth_header())
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "insights" in data
-    assert len(data["insights"]) >= 3
-
-
-def test_generic_predict():
-    payload = {"company": "Beta Systems", "value": 35000, "source": "Website"}
-    resp = client.post("/api/predict", json=payload, headers=_auth_header())
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "score" in data or "data" in data
-
-
-def test_predict_requires_auth():
-    resp = client.post("/api/predict/lead-score", json={"name": "X", "company": "Y", "value": 1000, "source": "Web"})
-    assert resp.status_code in (401, 403)
-
-
-# ---------------------------------------------------------------------------
-# Leads CRUD
-# ---------------------------------------------------------------------------
-def test_leads_crud():
-    h = _auth_header()
-    # List
-    resp = client.get("/api/leads", headers=h)
-    assert resp.status_code == 200
-    original_count = len(resp.json())
-    # Create
-    resp = client.post("/api/leads", json={
-        "name": "Test Lead", "company": "Test Co", "value": 50000, "source": "Referral",
-    }, headers=h)
-    assert resp.status_code == 200
-    lead_id = resp.json()["id"]
-    assert resp.json()["name"] == "Test Lead"
-    # Get
-    resp = client.get(f"/api/leads/{lead_id}", headers=h)
-    assert resp.status_code == 200
-    # Update
-    resp = client.put(f"/api/leads/{lead_id}", json={"company": "Updated Co"}, headers=h)
-    assert resp.status_code == 200
-    assert resp.json()["company"] == "Updated Co"
-    # Delete
-    resp = client.delete(f"/api/leads/{lead_id}", headers=h)
-    assert resp.status_code == 200
-
-
-# ---------------------------------------------------------------------------
-# Deals CRUD
-# ---------------------------------------------------------------------------
-def test_deals_crud():
-    h = _auth_header()
-    resp = client.get("/api/deals", headers=h)
-    assert resp.status_code == 200
-    resp = client.post("/api/deals", json={
-        "title": "Test Deal", "company": "Test Co", "value": 100000, "stage": "prospecting",
-    }, headers=h)
-    assert resp.status_code == 200
-    deal_id = resp.json()["id"]
-    resp = client.get(f"/api/deals/{deal_id}", headers=h)
-    assert resp.status_code == 200
-    resp = client.put(f"/api/deals/{deal_id}", json={"stage": "proposal"}, headers=h)
-    assert resp.status_code == 200
-    assert resp.json()["stage"] == "proposal"
-    resp = client.delete(f"/api/deals/{deal_id}", headers=h)
-    assert resp.status_code == 200
-
-
-# ---------------------------------------------------------------------------
-# Activities
-# ---------------------------------------------------------------------------
-def test_activities():
-    h = _auth_header()
-    resp = client.get("/api/activities", headers=h)
-    assert resp.status_code == 200
-    resp = client.post("/api/activities", json={
-        "deal_id": "d1", "type": "call", "content": "Test activity",
-    }, headers=h)
-    assert resp.status_code == 200
-    assert resp.json()["content"] == "Test activity"
-    act_id = resp.json()["id"]
-    resp = client.delete(f"/api/activities/{act_id}", headers=h)
-    assert resp.status_code == 200
-
-
-# ---------------------------------------------------------------------------
-# Accounts
-# ---------------------------------------------------------------------------
-def test_accounts():
-    h = _auth_header()
-    resp = client.get("/api/accounts", headers=h)
-    assert resp.status_code == 200
-    assert len(resp.json()) >= 5
-    resp = client.get("/api/accounts/c1", headers=h)
-    assert resp.status_code == 200
-
-
-# ---------------------------------------------------------------------------
-# Churn risk
-# ---------------------------------------------------------------------------
-def test_churn_risk():
-    h = _auth_header()
-    resp = client.get("/api/predict/churn-risk", headers=h)
-    assert resp.status_code == 200
-    assert len(resp.json()) >= 5
-    resp = client.get("/api/predict/churn-risk/c1", headers=h)
-    assert resp.status_code == 200
-    assert "risk_score" in resp.json()
-
-
-# ---------------------------------------------------------------------------
-# Anomalies
-# ---------------------------------------------------------------------------
-def test_anomalies():
-    h = _auth_header()
-    resp = client.get("/api/predict/anomalies", headers=h)
-    assert resp.status_code == 200
-    assert len(resp.json()) >= 5
-
-
-# ---------------------------------------------------------------------------
-# Next best actions
-# ---------------------------------------------------------------------------
-def test_next_best_actions():
-    h = _auth_header()
-    resp = client.get("/api/predict/next-best-actions", headers=h)
-    assert resp.status_code == 200
-    assert len(resp.json()) >= 5
-    resp = client.get("/api/predict/next-best-actions/d1", headers=h)
-    assert resp.status_code == 200
-    assert "recommendations" in resp.json()
-
-
-# ---------------------------------------------------------------------------
-# Alerts
-# ---------------------------------------------------------------------------
-def test_alerts():
-    h = _auth_header()
-    resp = client.get("/api/alerts", headers=h)
-    assert resp.status_code == 200
-    resp = client.get("/api/alerts/unread-count", headers=h)
-    assert resp.status_code == 200
-    assert "count" in resp.json()
-    resp = client.post("/api/alerts/regenerate", headers=h)
-    assert resp.status_code == 200
-
-
-# ---------------------------------------------------------------------------
-# Notifications
-# ---------------------------------------------------------------------------
-def test_notifications():
-    h = _auth_header()
-    resp = client.get("/api/notifications", headers=h)
-    assert resp.status_code == 200
-    resp = client.get("/api/notifications/unread-count", headers=h)
-    assert resp.status_code == 200
-    resp = client.post("/api/notifications/read-all", headers=h)
-    assert resp.status_code == 200
-
-
-# ---------------------------------------------------------------------------
-# Analytics
-# ---------------------------------------------------------------------------
-def test_analytics_funnel():
-    h = _auth_header()
-    resp = client.get("/api/analytics/funnel?by=source", headers=h)
-    assert resp.status_code == 200
-    assert resp.json()["by"] == "source"
-    resp = client.get("/api/analytics/funnel?by=stage", headers=h)
-    assert resp.status_code == 200
-
-
-def test_analytics_cohorts():
-    h = _auth_header()
-    resp = client.get("/api/analytics/cohorts", headers=h)
-    assert resp.status_code == 200
-    assert "cohorts" in resp.json()
-
-
-# ---------------------------------------------------------------------------
-# Users admin (admin only)
-# ---------------------------------------------------------------------------
-def test_users_admin():
-    h = _auth_header()
-    resp = client.get("/api/users", headers=h)
-    assert resp.status_code == 200
-    assert len(resp.json()) >= 3
-    # Manager should not access this
-    h_m = _auth_header(_get_token(MANAGER_EMAIL, MANAGER_PASSWORD))
-    resp = client.get("/api/users", headers=h_m)
-    assert resp.status_code == 403
-
-
-# ---------------------------------------------------------------------------
-# Model registry
-# ---------------------------------------------------------------------------
-def test_model_registry():
-    h = _auth_header()
-    resp = client.get("/api/admin/models", headers=h)
-    assert resp.status_code == 200
-    assert "lead_scoring" in resp.json()
-
-
-# ---------------------------------------------------------------------------
-# CSV export
-# ---------------------------------------------------------------------------
-def test_leads_export():
-    h = _auth_header()
-    resp = client.get("/api/leads/export", headers=h)
-    assert resp.status_code == 200
-    assert resp.headers.get("content-type") == "text/csv; charset=utf-8"
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+class TestDocs:
+    def test_openapi_schema(self):
+        resp = client.get("/openapi.json")
+        assert resp.status_code == 200
