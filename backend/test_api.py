@@ -235,6 +235,89 @@ class TestEventsSecurity:
         assert resp.status_code == 401
 
 
+class TestOmniRouteURL:
+    """Regression tests for the /v1/v1/chat/completions double-segment bug."""
+
+    def test_base_url_with_v1_segment_is_not_doubled(self):
+        from app.ai.omniroute import OmniRouteClient
+
+        client = OmniRouteClient(base_url="http://localhost:20128/v1", api_key="k")
+        assert client.chat_url == "http://localhost:20128/v1/chat/completions"
+        assert "/v1/v1/" not in client.chat_url
+
+    def test_base_url_without_v1_segment_gets_one(self):
+        from app.ai.omniroute import OmniRouteClient
+
+        client = OmniRouteClient(base_url="http://localhost:20128", api_key="k")
+        assert client.chat_url == "http://localhost:20128/v1/chat/completions"
+        assert "/v1/v1/" not in client.chat_url
+
+    def test_trailing_slash_is_tolerated(self):
+        from app.ai.omniroute import OmniRouteClient
+
+        client = OmniRouteClient(base_url="http://localhost:20128/v1/", api_key="k")
+        assert client.chat_url == "http://localhost:20128/v1/chat/completions"
+        assert "/v1/v1/" not in client.chat_url
+
+    def test_real_configured_url_is_well_formed(self):
+        from app.ai.omniroute import omniroute_client
+
+        url = omniroute_client.chat_url
+        assert "/v1/v1/" not in url, f"doubled version segment: {url}"
+        assert url.endswith("/chat/completions")
+
+
+class TestCopilotHonesty:
+    """The Copilot must always disclose which engine actually answered."""
+
+    def _login_admin(self):
+        from app.services import data_store as _ds
+
+        # The isolated test DB starts empty, so create the admin this test needs.
+        admin = _ds.get_user("admin@revops.pro")
+        if not admin:
+            admin = _ds.create_user({
+                "name": "Test Admin",
+                "email": "admin@revops.pro",
+                "password": "TestOnly123!",
+                "role": "admin",
+            })
+        from app.core.security import create_access_token
+
+        return create_access_token({"sub": admin["email"], "role": admin["role"]})
+
+    def test_response_declares_provider_model_and_note(self):
+        token = self._login_admin()
+        resp = client.post(
+            "/api/copilot/ask",
+            json={"question": "How is the pipeline doing?"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+
+        # These keys must always be present in the response contract.
+        assert "provider" in body
+        assert "model" in body
+        assert "note" in body
+        assert body["provider"] in ("omniroute", "local-rules")
+
+        if body["provider"] == "local-rules":
+            # Never let a deterministic answer masquerade as AI output.
+            assert body["model"] is None, "rule fallback must not claim a model"
+            assert body["note"], "rule fallback must explain itself"
+
+    def test_missing_credentials_are_reported(self):
+        from app.ai.copilot import RuleCopilot
+        from app.ai.omniroute import OmniRouteClient
+
+        copilot = RuleCopilot(OmniRouteClient(api_key=""))
+        result = copilot.ask("What is our revenue?")
+        assert result["provider"] == "local-rules"
+        assert result["model"] is None
+        assert "credentials" in result["note"].lower()
+
+
 class TestModels:
     def test_lead_scoring_model(self):
         from app.ml.artifacts.lead_scoring_model import LeadScoringModel
