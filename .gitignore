@@ -18,4 +18,5 @@ node_modules/
 .kilo/
 LOOP_LOG.md
 _verify_routes.txt
+scripts/.dev-pids.json
 
