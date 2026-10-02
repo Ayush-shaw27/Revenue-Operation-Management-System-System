@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.inspection import permutation_importance
+
 ARTIFACT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 CHURN_MODEL_PATH = os.path.join(ARTIFACT_DIR, "churn_model.joblib")
 
@@ -52,6 +54,9 @@ class ChurnRiskModel:
             n_estimators=160, max_depth=7, min_samples_leaf=4, random_state=7
         )
         self.model.fit(df, y)
+        # Compute permutation importance
+        result = permutation_importance(self.model, df, y, n_repeats=5, random_state=7, n_jobs=-1)
+        self._feature_importances = result.importances_mean
         self._accuracy = float(np.mean(self.model.predict(df) == y))
         self.is_trained = True
         self._save()

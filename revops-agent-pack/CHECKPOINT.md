@@ -64,6 +64,12 @@ Read this + `CLAUDE.md` at the start of every session. Do the first unchecked ta
 - Result:
 
 ### T-007 — Honest ML/admin metrics
+- [x] Revenue forecast: replace in-sample R² with a time-based holdout metric (walk-forward MAPE/R²)
+- [x] `model_registry` accuracies reflect real evaluation, not 0.0 placeholders
+- [x] `/api/admin/stats`: real request count/latency (middleware) and real inference count instead of hardcoded 99.9 / 42.5 / 0
+- VERIFY: two consecutive calls to `/api/admin/stats` show numbers that actually change with traffic; forecast response includes a labelled holdout metric
+- Result: ML and admin metrics verified.
+
 - [ ] Revenue forecast: replace in-sample R² with a time-based holdout metric (walk-forward MAPE/R²)
 - [ ] `model_registry` accuracies reflect real evaluation, not 0.0 placeholders
 - [ ] `/api/admin/stats`: real request count/latency (middleware) and real inference count instead of hardcoded 99.9 / 42.5 / 0
