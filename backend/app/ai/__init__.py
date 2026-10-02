@@ -1,0 +1,1 @@
+"""AI package: OmniRoute provider client + grounded copilot."""

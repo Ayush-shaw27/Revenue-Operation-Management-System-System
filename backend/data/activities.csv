@@ -1,0 +1,301 @@
+id,deal_id,lead_id,type,author,content,created_at
+ac1,d53,,call,Sarah Johnson,Renewal discussion — expansion opportunity identified.,2024-03-24 08:04:00
+ac2,,l151,call,Sarah Johnson,Intro call — stakeholder alignment meeting scheduled.,2024-11-20 13:56:00
+ac3,,l313,email,Mike Chen,Sent proposal v2 with security addendum.,2024-03-17 11:23:00
+ac4,d56,,note,Sarah Johnson,Decision maker on leave until next month.,2024-06-27 11:06:00
+ac5,,l158,stage_change,Mike Chen,Moved forward after successful technical validation.,2024-10-24 10:56:00
+ac6,d90,,note,John Smith,Decision maker on leave until next month.,2024-02-05 17:19:00
+ac7,,l199,email,Sarah Johnson,Onboarding timeline and SOW delivered.,2024-10-25 14:02:00
+ac8,d41,,email,John Smith,Case study and ROI analysis shared with decision-maker.,2024-10-01 16:20:00
+ac9,d96,,call,Sarah Johnson,Architecture review call — integration requirements mapped.,2024-04-10 08:57:00
+ac10,d41,,note,John Smith,Decision maker on leave until next month.,2024-12-26 13:35:00
+ac11,,l239,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-11-16 11:26:00
+ac12,d79,,call,John Smith,Executive sponsor call — committed to Q1 close.,2024-08-01 10:57:00
+ac13,,l351,stage_change,John Smith,Stage progression confirmed by account owner.,2024-04-22 12:50:00
+ac14,,l181,email,Mike Chen,Follow-up email with competitive analysis.,2024-12-04 17:25:00
+ac15,d59,,email,Mike Chen,Pricing tier breakdown sent for review.,2024-03-08 15:48:00
+ac16,,l286,email,Sarah Johnson,Case study and ROI analysis shared with decision-maker.,2024-05-03 15:51:00
+ac17,,l141,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-09-09 14:12:00
+ac18,d120,,note,John Smith,Decision maker on leave until next month.,2024-11-22 09:44:00
+ac19,d16,,stage_change,Mike Chen,Moved forward after successful technical validation.,2024-02-27 13:21:00
+ac20,,l320,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-01-12 11:43:00
+ac21,d22,,call,Sarah Johnson,Negotiation call — pricing terms discussed.,2024-07-08 13:09:00
+ac22,d44,,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-05-04 16:58:00
+ac23,d101,,stage_change,John Smith,Moved forward after successful technical validation.,2024-06-11 14:22:00
+ac24,d49,,call,John Smith,Intro call — stakeholder alignment meeting scheduled.,2024-08-09 11:09:00
+ac25,d84,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-07-02 12:23:00
+ac26,,l53,stage_change,Sarah Johnson,Moved forward after successful technical validation.,2024-04-20 15:41:00
+ac27,d65,,email,Sarah Johnson,Technical documentation package delivered.,2024-12-24 14:59:00
+ac28,d5,,email,John Smith,Technical documentation package delivered.,2024-05-17 13:30:00
+ac29,,l217,note,Sarah Johnson,Internal champion identified — VP of Engineering.,2024-10-24 08:54:00
+ac30,d34,,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-04-06 12:11:00
+ac31,,l283,email,John Smith,Follow-up email with competitive analysis.,2024-02-20 08:14:00
+ac32,d119,,call,Mike Chen,Intro call — stakeholder alignment meeting scheduled.,2024-02-06 15:11:00
+ac33,,l382,email,Sarah Johnson,Follow-up email with competitive analysis.,2024-05-15 14:49:00
+ac34,d69,,note,Mike Chen,Budget approved for Q2. Legal review in progress.,2024-06-19 14:49:00
+ac35,,l4,email,Mike Chen,Onboarding timeline and SOW delivered.,2024-03-23 15:58:00
+ac36,,l206,email,Sarah Johnson,Onboarding timeline and SOW delivered.,2024-05-17 14:32:00
+ac37,,l359,call,Sarah Johnson,Intro call — stakeholder alignment meeting scheduled.,2024-09-10 08:45:00
+ac38,d66,,note,Mike Chen,Internal champion identified — VP of Engineering.,2024-10-16 09:03:00
+ac39,,l273,email,Sarah Johnson,Technical documentation package delivered.,2024-05-08 16:35:00
+ac40,,l96,call,Mike Chen,Renewal discussion — expansion opportunity identified.,2024-03-21 08:23:00
+ac41,,l65,note,Sarah Johnson,Decision maker on leave until next month.,2024-09-02 08:43:00
+ac42,,l373,call,John Smith,Follow-up call: technical requirements clarified.,2024-05-22 17:07:00
+ac43,d25,,note,John Smith,Internal champion identified — VP of Engineering.,2024-04-04 16:47:00
+ac44,,l394,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-01-03 14:54:00
+ac45,,l46,note,Sarah Johnson,Competitor evaluation underway — 3 vendors shortlisted.,2024-11-26 12:20:00
+ac46,,l30,email,John Smith,Pricing tier breakdown sent for review.,2024-10-04 09:23:00
+ac47,d87,,email,John Smith,Pricing tier breakdown sent for review.,2024-08-09 11:35:00
+ac48,d117,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-09-09 10:02:00
+ac49,,l328,call,Sarah Johnson,Negotiation call — pricing terms discussed.,2024-09-15 11:09:00
+ac50,d34,,email,John Smith,Thank you note post-demo with next steps.,2024-08-06 08:53:00
+ac51,d112,,email,Sarah Johnson,Technical documentation package delivered.,2024-11-06 14:58:00
+ac52,d109,,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-06-08 14:52:00
+ac53,d3,,call,John Smith,Intro call — stakeholder alignment meeting scheduled.,2024-05-20 12:33:00
+ac54,d5,,call,John Smith,Intro call — stakeholder alignment meeting scheduled.,2024-07-26 14:34:00
+ac55,,l107,email,Sarah Johnson,Thank you note post-demo with next steps.,2024-02-01 10:19:00
+ac56,,l309,email,Mike Chen,Onboarding timeline and SOW delivered.,2024-05-23 12:11:00
+ac57,,l176,call,John Smith,Renewal discussion — expansion opportunity identified.,2024-11-25 17:29:00
+ac58,,l215,note,Mike Chen,Competitor evaluation underway — 3 vendors shortlisted.,2024-04-15 14:08:00
+ac59,d49,,call,Mike Chen,Renewal discussion — expansion opportunity identified.,2024-05-15 11:36:00
+ac60,d8,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-03-22 12:32:00
+ac61,d110,,call,John Smith,Negotiation call — pricing terms discussed.,2024-04-06 08:07:00
+ac62,,l343,note,Mike Chen,Competitor evaluation underway — 3 vendors shortlisted.,2024-06-11 14:19:00
+ac63,d43,,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-04-05 11:44:00
+ac64,,l6,email,Mike Chen,Pricing tier breakdown sent for review.,2024-09-16 17:35:00
+ac65,,l291,call,Mike Chen,Architecture review call — integration requirements mapped.,2024-02-05 13:37:00
+ac66,,l83,note,Sarah Johnson,Decision maker on leave until next month.,2024-09-13 10:05:00
+ac67,d84,,call,John Smith,Check-in call — product demo feedback positive.,2024-06-05 15:29:00
+ac68,d20,,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-12-26 17:49:00
+ac69,d106,,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-01-12 12:59:00
+ac70,,l90,email,John Smith,Sent proposal v2 with security addendum.,2024-05-24 15:49:00
+ac71,d89,,note,John Smith,Pilot program agreed — 30-day evaluation.,2024-08-21 14:22:00
+ac72,d59,,email,Sarah Johnson,Technical documentation package delivered.,2024-08-09 10:25:00
+ac73,d61,,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-09-17 16:51:00
+ac74,d58,,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-09-02 13:54:00
+ac75,d2,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-03-26 15:16:00
+ac76,d98,,call,Mike Chen,Check-in call — product demo feedback positive.,2024-10-13 11:23:00
+ac77,d43,,email,Sarah Johnson,Sent proposal v2 with security addendum.,2024-06-10 17:31:00
+ac78,,l221,stage_change,John Smith,Moved forward after successful technical validation.,2024-05-08 08:47:00
+ac79,d16,,call,John Smith,Architecture review call — integration requirements mapped.,2024-01-06 17:26:00
+ac80,,l44,note,John Smith,Internal champion identified — VP of Engineering.,2024-09-21 17:19:00
+ac81,d10,,email,Sarah Johnson,Pricing tier breakdown sent for review.,2024-07-16 15:34:00
+ac82,,l214,email,Mike Chen,Case study and ROI analysis shared with decision-maker.,2024-05-27 14:50:00
+ac83,,l281,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-07-09 08:40:00
+ac84,,l205,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-06-19 17:21:00
+ac85,d5,,call,John Smith,Renewal discussion — expansion opportunity identified.,2024-06-26 09:17:00
+ac86,,l313,call,Sarah Johnson,Follow-up call: technical requirements clarified.,2024-09-11 17:10:00
+ac87,d84,,call,John Smith,Architecture review call — integration requirements mapped.,2024-01-07 11:43:00
+ac88,d99,,email,Sarah Johnson,Thank you note post-demo with next steps.,2024-03-08 12:56:00
+ac89,,l192,email,Sarah Johnson,Case study and ROI analysis shared with decision-maker.,2024-07-25 11:28:00
+ac90,d14,,call,John Smith,Check-in call — product demo feedback positive.,2024-04-24 13:40:00
+ac91,,l351,call,John Smith,Executive sponsor call — committed to Q1 close.,2024-12-01 10:32:00
+ac92,,l358,stage_change,John Smith,Stage progression confirmed by account owner.,2024-01-08 09:07:00
+ac93,,l375,email,John Smith,Sent proposal v2 with security addendum.,2024-01-18 14:07:00
+ac94,,l261,stage_change,John Smith,Moved forward after successful technical validation.,2024-08-03 10:21:00
+ac95,,l263,call,Mike Chen,Renewal discussion — expansion opportunity identified.,2024-01-20 08:48:00
+ac96,d102,,call,Mike Chen,Intro call — stakeholder alignment meeting scheduled.,2024-11-22 12:33:00
+ac97,,l296,email,John Smith,Sent proposal v2 with security addendum.,2024-08-09 12:02:00
+ac98,,l329,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-03-17 17:53:00
+ac99,d49,,call,Mike Chen,Check-in call — product demo feedback positive.,2024-08-01 17:06:00
+ac100,,l230,email,Sarah Johnson,Thank you note post-demo with next steps.,2024-01-27 14:46:00
+ac101,,l171,call,John Smith,Negotiation call — pricing terms discussed.,2024-10-02 15:05:00
+ac102,,l162,email,John Smith,Onboarding timeline and SOW delivered.,2024-05-08 13:41:00
+ac103,d39,,note,Mike Chen,Internal champion identified — VP of Engineering.,2024-09-13 09:40:00
+ac104,,l23,email,Sarah Johnson,Sent proposal v2 with security addendum.,2024-07-25 17:02:00
+ac105,,l376,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-11-17 13:21:00
+ac106,,l199,call,Mike Chen,Discovery call with procurement — budget confirmed for Q1.,2024-07-16 12:22:00
+ac107,d73,,call,Mike Chen,Executive sponsor call — committed to Q1 close.,2024-09-20 14:05:00
+ac108,d47,,call,Sarah Johnson,Intro call — stakeholder alignment meeting scheduled.,2024-12-19 14:49:00
+ac109,d58,,call,Sarah Johnson,Negotiation call — pricing terms discussed.,2024-03-06 15:12:00
+ac110,d18,,note,John Smith,Pilot program agreed — 30-day evaluation.,2024-10-12 09:59:00
+ac111,d73,,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-06-22 15:28:00
+ac112,,l205,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-04-05 15:56:00
+ac113,d33,,email,Sarah Johnson,Technical documentation package delivered.,2024-04-16 17:12:00
+ac114,,l399,stage_change,Sarah Johnson,Moved forward after successful technical validation.,2024-07-13 13:51:00
+ac115,d41,,call,Mike Chen,Executive sponsor call — committed to Q1 close.,2024-09-18 11:24:00
+ac116,d51,,call,John Smith,Intro call — stakeholder alignment meeting scheduled.,2024-12-07 11:14:00
+ac117,,l86,note,John Smith,Competitor evaluation underway — 3 vendors shortlisted.,2024-02-07 13:57:00
+ac118,,l222,email,Mike Chen,Case study and ROI analysis shared with decision-maker.,2024-01-12 15:30:00
+ac119,d41,,call,Sarah Johnson,Executive sponsor call — committed to Q1 close.,2024-08-01 12:22:00
+ac120,d29,,email,John Smith,Follow-up email with competitive analysis.,2024-10-02 08:32:00
+ac121,d52,,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-03-16 16:15:00
+ac122,d103,,email,Mike Chen,Sent proposal v2 with security addendum.,2024-11-04 11:15:00
+ac123,,l342,note,John Smith,Budget approved for Q2. Legal review in progress.,2024-06-05 11:37:00
+ac124,,l159,note,Sarah Johnson,Competitor evaluation underway — 3 vendors shortlisted.,2024-01-12 10:05:00
+ac125,d71,,email,Sarah Johnson,Pricing tier breakdown sent for review.,2024-10-18 17:13:00
+ac126,,l217,note,John Smith,Pilot program agreed — 30-day evaluation.,2024-01-08 13:48:00
+ac127,,l236,stage_change,John Smith,Moved forward after successful technical validation.,2024-11-25 12:02:00
+ac128,d4,,call,Sarah Johnson,Renewal discussion — expansion opportunity identified.,2024-06-16 16:21:00
+ac129,d58,,stage_change,John Smith,Moved forward after successful technical validation.,2024-08-08 08:50:00
+ac130,,l392,email,John Smith,Follow-up email with competitive analysis.,2024-06-02 10:05:00
+ac131,,l352,call,Mike Chen,Executive sponsor call — committed to Q1 close.,2024-06-13 10:25:00
+ac132,,l283,call,Sarah Johnson,Architecture review call — integration requirements mapped.,2024-03-08 12:30:00
+ac133,,l182,call,Sarah Johnson,Intro call — stakeholder alignment meeting scheduled.,2024-09-25 16:40:00
+ac134,d86,,call,Sarah Johnson,Check-in call — product demo feedback positive.,2024-11-05 16:24:00
+ac135,d107,,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-11-02 11:05:00
+ac136,d97,,call,Sarah Johnson,Intro call — stakeholder alignment meeting scheduled.,2024-09-14 09:13:00
+ac137,d36,,note,Mike Chen,Decision maker on leave until next month.,2024-12-27 08:47:00
+ac138,d85,,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-10-15 13:19:00
+ac139,,l273,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-06-20 14:37:00
+ac140,,l102,email,Sarah Johnson,Onboarding timeline and SOW delivered.,2024-08-06 17:47:00
+ac141,d20,,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-12-13 14:21:00
+ac142,d73,,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-04-08 10:43:00
+ac143,,l161,note,John Smith,Competitor evaluation underway — 3 vendors shortlisted.,2024-04-20 08:27:00
+ac144,d34,,call,John Smith,Check-in call — product demo feedback positive.,2024-12-08 12:12:00
+ac145,,l75,note,Sarah Johnson,Competitor evaluation underway — 3 vendors shortlisted.,2024-07-25 12:02:00
+ac146,d24,,note,John Smith,Competitor evaluation underway — 3 vendors shortlisted.,2024-09-23 08:44:00
+ac147,d108,,note,John Smith,Internal champion identified — VP of Engineering.,2024-06-03 15:44:00
+ac148,d23,,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-09-19 16:02:00
+ac149,d56,,call,John Smith,Renewal discussion — expansion opportunity identified.,2024-07-26 09:02:00
+ac150,,l389,note,John Smith,Decision maker on leave until next month.,2024-02-08 12:01:00
+ac151,d79,,email,Mike Chen,Follow-up email with competitive analysis.,2024-05-22 10:21:00
+ac152,d80,,note,Sarah Johnson,Competitor evaluation underway — 3 vendors shortlisted.,2024-06-25 12:06:00
+ac153,,l186,call,Sarah Johnson,Renewal discussion — expansion opportunity identified.,2024-08-05 08:45:00
+ac154,,l144,email,Sarah Johnson,Thank you note post-demo with next steps.,2024-10-26 11:39:00
+ac155,,l382,stage_change,John Smith,Stage progression confirmed by account owner.,2024-10-01 13:09:00
+ac156,d17,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-06-24 17:54:00
+ac157,d98,,stage_change,Mike Chen,Moved forward after successful technical validation.,2024-12-09 12:34:00
+ac158,d98,,email,Mike Chen,Onboarding timeline and SOW delivered.,2024-01-23 08:11:00
+ac159,d26,,call,Sarah Johnson,Executive sponsor call — committed to Q1 close.,2024-09-22 10:04:00
+ac160,,l69,call,Mike Chen,Check-in call — product demo feedback positive.,2024-01-09 09:12:00
+ac161,,l390,call,John Smith,Discovery call with procurement — budget confirmed for Q1.,2024-03-20 11:04:00
+ac162,d72,,email,Sarah Johnson,Onboarding timeline and SOW delivered.,2024-09-26 08:24:00
+ac163,,l278,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-08-08 16:02:00
+ac164,d82,,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-06-07 12:06:00
+ac165,d34,,stage_change,John Smith,Moved forward after successful technical validation.,2024-09-25 15:29:00
+ac166,,l205,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-10-03 11:02:00
+ac167,d86,,note,John Smith,Competitor evaluation underway — 3 vendors shortlisted.,2024-01-07 15:40:00
+ac168,,l384,note,Sarah Johnson,Internal champion identified — VP of Engineering.,2024-05-12 14:23:00
+ac169,,l242,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-10-21 10:48:00
+ac170,,l267,stage_change,Mike Chen,Moved forward after successful technical validation.,2024-03-16 16:56:00
+ac171,d15,,call,Mike Chen,Intro call — stakeholder alignment meeting scheduled.,2024-05-10 09:29:00
+ac172,d115,,call,Sarah Johnson,Negotiation call — pricing terms discussed.,2024-01-25 17:16:00
+ac173,,l165,call,Mike Chen,Architecture review call — integration requirements mapped.,2024-07-06 16:24:00
+ac174,,l387,note,John Smith,Internal champion identified — VP of Engineering.,2024-02-19 09:21:00
+ac175,,l72,call,John Smith,Check-in call — product demo feedback positive.,2024-09-09 11:34:00
+ac176,,l106,call,Sarah Johnson,Executive sponsor call — committed to Q1 close.,2024-02-12 12:14:00
+ac177,,l134,email,Sarah Johnson,Follow-up email with competitive analysis.,2024-12-24 13:00:00
+ac178,d68,,email,John Smith,Onboarding timeline and SOW delivered.,2024-06-01 15:51:00
+ac179,d26,,email,Sarah Johnson,Sent proposal v2 with security addendum.,2024-11-16 09:01:00
+ac180,,l184,note,Mike Chen,Budget approved for Q2. Legal review in progress.,2024-10-06 14:42:00
+ac181,,l361,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-05-11 15:57:00
+ac182,d113,,note,Mike Chen,Internal champion identified — VP of Engineering.,2024-01-16 11:18:00
+ac183,,l63,note,Mike Chen,Decision maker on leave until next month.,2024-03-05 13:37:00
+ac184,d19,,stage_change,Sarah Johnson,Moved forward after successful technical validation.,2024-06-12 16:07:00
+ac185,d117,,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-03-10 12:47:00
+ac186,d2,,email,Mike Chen,Thank you note post-demo with next steps.,2024-07-27 14:59:00
+ac187,d78,,call,Sarah Johnson,Executive sponsor call — committed to Q1 close.,2024-07-21 09:32:00
+ac188,d21,,stage_change,John Smith,Moved forward after successful technical validation.,2024-03-03 09:20:00
+ac189,,l177,call,John Smith,Discovery call with procurement — budget confirmed for Q1.,2024-01-01 16:26:00
+ac190,,l181,email,Sarah Johnson,Sent proposal v2 with security addendum.,2024-10-06 15:10:00
+ac191,,l200,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-01-21 10:57:00
+ac192,d73,,note,Sarah Johnson,Internal champion identified — VP of Engineering.,2024-08-08 17:56:00
+ac193,,l91,note,John Smith,Internal champion identified — VP of Engineering.,2024-07-22 11:14:00
+ac194,d46,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-12-20 16:11:00
+ac195,d94,,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-09-06 14:58:00
+ac196,,l362,note,Mike Chen,Budget approved for Q2. Legal review in progress.,2024-03-23 16:15:00
+ac197,d53,,email,Sarah Johnson,Technical documentation package delivered.,2024-10-09 11:09:00
+ac198,d35,,call,Sarah Johnson,Intro call — stakeholder alignment meeting scheduled.,2024-10-17 14:35:00
+ac199,,l359,call,John Smith,Renewal discussion — expansion opportunity identified.,2024-02-17 13:13:00
+ac200,,l355,note,Sarah Johnson,Decision maker on leave until next month.,2024-04-27 10:52:00
+ac201,d82,,call,John Smith,Architecture review call — integration requirements mapped.,2024-05-16 13:11:00
+ac202,,l153,call,Mike Chen,Follow-up call: technical requirements clarified.,2024-10-19 13:58:00
+ac203,,l282,call,Sarah Johnson,Follow-up call: technical requirements clarified.,2024-09-07 13:11:00
+ac204,,l358,call,Mike Chen,Check-in call — product demo feedback positive.,2024-03-16 15:32:00
+ac205,,l357,email,John Smith,Follow-up email with competitive analysis.,2024-07-07 08:32:00
+ac206,d45,,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-06-17 12:48:00
+ac207,d76,,note,Mike Chen,Internal champion identified — VP of Engineering.,2024-12-23 17:08:00
+ac208,d26,,note,Mike Chen,Decision maker on leave until next month.,2024-12-06 11:01:00
+ac209,d109,,stage_change,John Smith,Moved forward after successful technical validation.,2024-04-27 11:43:00
+ac210,,l255,email,Mike Chen,Technical documentation package delivered.,2024-09-12 09:58:00
+ac211,d10,,note,Sarah Johnson,Pilot program agreed — 30-day evaluation.,2024-01-20 16:09:00
+ac212,d98,,email,Mike Chen,Onboarding timeline and SOW delivered.,2024-12-22 11:19:00
+ac213,d97,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-09-05 09:01:00
+ac214,d28,,note,John Smith,Internal champion identified — VP of Engineering.,2024-08-25 11:36:00
+ac215,,l129,stage_change,John Smith,Stage progression confirmed by account owner.,2024-07-16 14:45:00
+ac216,,l384,call,John Smith,Intro call — stakeholder alignment meeting scheduled.,2024-04-10 08:56:00
+ac217,d60,,call,John Smith,Negotiation call — pricing terms discussed.,2024-05-02 08:31:00
+ac218,,l293,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-01-19 15:12:00
+ac219,,l4,note,John Smith,Decision maker on leave until next month.,2024-07-14 11:02:00
+ac220,,l376,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-07-27 14:56:00
+ac221,d104,,call,Mike Chen,Executive sponsor call — committed to Q1 close.,2024-06-11 09:19:00
+ac222,d33,,note,Mike Chen,Internal champion identified — VP of Engineering.,2024-11-12 16:44:00
+ac223,d8,,stage_change,John Smith,Moved forward after successful technical validation.,2024-08-12 11:06:00
+ac224,d21,,call,Sarah Johnson,Check-in call — product demo feedback positive.,2024-05-25 08:20:00
+ac225,,l44,call,Mike Chen,Renewal discussion — expansion opportunity identified.,2024-06-21 08:27:00
+ac226,d81,,email,Mike Chen,Onboarding timeline and SOW delivered.,2024-12-01 09:20:00
+ac227,d70,,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-06-21 15:49:00
+ac228,d81,,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-02-27 16:53:00
+ac229,d119,,email,John Smith,Technical documentation package delivered.,2024-03-14 13:21:00
+ac230,d37,,stage_change,Mike Chen,Moved forward after successful technical validation.,2024-12-01 08:32:00
+ac231,,l303,call,Mike Chen,Architecture review call — integration requirements mapped.,2024-03-24 14:00:00
+ac232,d58,,note,Mike Chen,Decision maker on leave until next month.,2024-02-18 17:04:00
+ac233,,l120,note,John Smith,Competitor evaluation underway — 3 vendors shortlisted.,2024-10-10 09:05:00
+ac234,d20,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-05-19 17:21:00
+ac235,,l298,note,Sarah Johnson,Competitor evaluation underway — 3 vendors shortlisted.,2024-02-06 08:00:00
+ac236,,l354,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-09-06 13:31:00
+ac237,d50,,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-11-01 09:48:00
+ac238,d59,,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-05-15 16:58:00
+ac239,d38,,call,Mike Chen,Intro call — stakeholder alignment meeting scheduled.,2024-02-09 12:24:00
+ac240,,l163,call,Mike Chen,Check-in call — product demo feedback positive.,2024-07-16 10:43:00
+ac241,d80,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-06-04 13:16:00
+ac242,d21,,email,Sarah Johnson,Sent proposal v2 with security addendum.,2024-02-27 11:34:00
+ac243,,l46,email,Sarah Johnson,Onboarding timeline and SOW delivered.,2024-06-10 12:04:00
+ac244,d65,,call,John Smith,Executive sponsor call — committed to Q1 close.,2024-09-21 16:58:00
+ac245,d82,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-08-15 16:41:00
+ac246,,l76,note,John Smith,Internal champion identified — VP of Engineering.,2024-11-24 14:40:00
+ac247,,l255,note,Sarah Johnson,Contact prefers email outreach. CTO is the economic buyer.,2024-04-09 08:17:00
+ac248,d103,,stage_change,Mike Chen,Moved forward after successful technical validation.,2024-01-03 10:16:00
+ac249,,l59,note,Sarah Johnson,Decision maker on leave until next month.,2024-05-09 13:31:00
+ac250,d116,,call,Sarah Johnson,Architecture review call — integration requirements mapped.,2024-03-01 10:01:00
+ac251,,l261,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-10-08 12:23:00
+ac252,,l69,stage_change,John Smith,Moved forward after successful technical validation.,2024-09-09 08:19:00
+ac253,d16,,email,Mike Chen,Thank you note post-demo with next steps.,2024-06-17 14:17:00
+ac254,d114,,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-12-05 10:58:00
+ac255,,l120,call,John Smith,Check-in call — product demo feedback positive.,2024-11-15 14:42:00
+ac256,,l263,stage_change,Sarah Johnson,Moved forward after successful technical validation.,2024-05-23 10:39:00
+ac257,d83,,email,Sarah Johnson,Sent proposal v2 with security addendum.,2024-07-21 11:18:00
+ac258,d50,,note,Mike Chen,Budget approved for Q2. Legal review in progress.,2024-02-08 11:13:00
+ac259,d97,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-10-03 08:49:00
+ac260,,l221,note,Mike Chen,Competitor evaluation underway — 3 vendors shortlisted.,2024-09-23 13:56:00
+ac261,,l137,call,Mike Chen,Intro call — stakeholder alignment meeting scheduled.,2024-03-15 17:53:00
+ac262,d73,,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-01-05 09:54:00
+ac263,d103,,note,John Smith,Budget approved for Q2. Legal review in progress.,2024-10-22 09:52:00
+ac264,d34,,note,Sarah Johnson,Decision maker on leave until next month.,2024-08-07 10:56:00
+ac265,d94,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-07-08 17:34:00
+ac266,d112,,note,Sarah Johnson,Budget approved for Q2. Legal review in progress.,2024-12-15 08:06:00
+ac267,,l197,note,Sarah Johnson,Competitor evaluation underway — 3 vendors shortlisted.,2024-05-10 09:03:00
+ac268,,l278,note,John Smith,Internal champion identified — VP of Engineering.,2024-09-08 13:38:00
+ac269,,l8,call,John Smith,Renewal discussion — expansion opportunity identified.,2024-09-18 10:48:00
+ac270,d14,,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-01-05 13:00:00
+ac271,d64,,email,Mike Chen,Thank you note post-demo with next steps.,2024-07-24 15:54:00
+ac272,,l265,note,Mike Chen,Decision maker on leave until next month.,2024-05-18 10:47:00
+ac273,d43,,note,Mike Chen,Competitor evaluation underway — 3 vendors shortlisted.,2024-09-24 15:28:00
+ac274,d37,,stage_change,Mike Chen,Stage progression confirmed by account owner.,2024-12-24 09:14:00
+ac275,,l367,email,Sarah Johnson,Pricing tier breakdown sent for review.,2024-06-23 14:11:00
+ac276,,l378,note,Mike Chen,Pilot program agreed — 30-day evaluation.,2024-07-11 12:57:00
+ac277,d34,,email,John Smith,Onboarding timeline and SOW delivered.,2024-08-01 09:27:00
+ac278,d65,,email,John Smith,Onboarding timeline and SOW delivered.,2024-07-23 13:21:00
+ac279,d116,,call,Sarah Johnson,Follow-up call: technical requirements clarified.,2024-08-01 13:34:00
+ac280,d55,,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-04-21 17:39:00
+ac281,d104,,note,Sarah Johnson,Decision maker on leave until next month.,2024-07-21 08:12:00
+ac282,d80,,stage_change,Sarah Johnson,Stage progression confirmed by account owner.,2024-12-07 08:44:00
+ac283,d23,,call,John Smith,Architecture review call — integration requirements mapped.,2024-09-19 14:51:00
+ac284,d77,,call,Mike Chen,Discovery call with procurement — budget confirmed for Q1.,2024-05-19 16:10:00
+ac285,,l52,note,Mike Chen,Contact prefers email outreach. CTO is the economic buyer.,2024-03-18 14:41:00
+ac286,,l121,call,Mike Chen,Intro call — stakeholder alignment meeting scheduled.,2024-04-12 16:51:00
+ac287,d111,,email,Sarah Johnson,Technical documentation package delivered.,2024-08-13 09:04:00
+ac288,d48,,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-03-01 09:17:00
+ac289,d25,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-04-27 11:38:00
+ac290,,l185,call,Sarah Johnson,Executive sponsor call — committed to Q1 close.,2024-04-09 14:56:00
+ac291,d37,,stage_change,John Smith,Stage progression confirmed by account owner.,2024-03-05 09:39:00
+ac292,d52,,note,Mike Chen,Budget approved for Q2. Legal review in progress.,2024-05-08 17:59:00
+ac293,,l169,stage_change,John Smith,Moved forward after successful technical validation.,2024-06-14 14:17:00
+ac294,d9,,stage_change,John Smith,Moved forward after successful technical validation.,2024-08-27 12:10:00
+ac295,,l92,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-09-23 15:40:00
+ac296,,l244,call,Sarah Johnson,Executive sponsor call — committed to Q1 close.,2024-04-24 12:14:00
+ac297,d20,,call,Mike Chen,Negotiation call — pricing terms discussed.,2024-01-03 16:47:00
+ac298,d2,,email,John Smith,Pricing tier breakdown sent for review.,2024-02-22 13:29:00
+ac299,d28,,call,Sarah Johnson,Negotiation call — pricing terms discussed.,2024-02-12 10:13:00
+ac300,d42,,call,Mike Chen,Check-in call — product demo feedback positive.,2024-02-12 13:07:00

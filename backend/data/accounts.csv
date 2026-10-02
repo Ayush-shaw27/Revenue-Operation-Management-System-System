@@ -1,0 +1,61 @@
+id,name,industry,contract_value,last_activity_days,usage_trend,ticket_count,renewal_in_days,health_score
+c1,CartGenius,Retail,40535.38,43,0.3,6,54,0.4
+c2,CreditLens,FinTech,335234.45,25,-0.09,8,41,0.49
+c3,DevOps Central,Technology,308364.38,16,0.06,9,39,0.59
+c4,PlatformHQ,SaaS,115583.43,2,-0.59,6,147,0.53
+c5,PayStream Global,FinTech,13513.21,9,-0.19,9,41,0.62
+c6,BioData Analytics,Healthcare,81194.14,14,-0.1,5,118,0.54
+c7,ClinicalEdge,Healthcare,45779.26,9,-0.11,6,2,0.34
+c8,HealthSync Pro,Healthcare,53371.06,45,-0.27,6,98,0.25
+c9,PulsePoint Health,Healthcare,19829.04,4,-0.44,5,228,0.69
+c10,MetalCraft Systems,Manufacturing,58440.0,69,0.12,9,139,0.4
+c11,StoreSync AI,Retail,166336.9,6,0.35,9,53,0.68
+c12,PriceWatch,Retail,232909.02,14,-0.59,7,110,0.38
+c13,WealthLogic,FinTech,52988.7,30,-0.12,7,166,0.4
+c14,RetailOps Pro,Retail,148000.7,22,-0.03,3,24,0.39
+c15,FactoryLine Pro,Manufacturing,96128.48,20,0.28,4,36,0.62
+c16,GearWorks,Manufacturing,30562.15,15,0.09,6,80,0.67
+c17,PharmaEdge,Healthcare,12334.0,21,0.22,4,106,0.69
+c18,CloudNine Platform,SaaS,160703.37,1,0.38,6,86,0.81
+c19,MarketReach,Retail,60284.8,27,-0.37,6,40,0.28
+c20,InsightEngine,SaaS,366998.85,7,-0.1,5,28,0.51
+c21,PipelinePro,SaaS,29395.81,67,-0.15,13,130,0.32
+c22,DataStream Co,Technology,10446.49,67,-0.9,8,11,0.05
+c23,SupplyChain360,Manufacturing,12280.28,3,0.0,4,24,0.68
+c24,MedTech Solutions,Healthcare,133667.54,15,-0.09,5,12,0.35
+c25,TechStart Inc,Technology,57609.01,0,-0.3,4,107,0.68
+c26,NexGen Software,Technology,12103.87,69,-0.47,6,55,0.08
+c27,CodePilot AI,Technology,79342.3,13,-0.73,1,97,0.48
+c28,VitalSign AI,Healthcare,249514.43,80,0.1,9,111,0.4
+c29,SaaSify,SaaS,27551.66,56,0.57,7,50,0.42
+c30,GenomeTech,Healthcare,12874.44,7,0.02,10,134,0.78
+c31,ConsumerPulse,Retail,133080.35,7,0.28,6,174,0.67
+c32,Acme Corp,Technology,19291.32,54,-0.57,6,158,0.07
+c33,InsureTech Pro,FinTech,82276.94,17,-0.18,5,15,0.32
+c34,ShopSphere,Retail,147656.4,35,-0.24,4,38,0.25
+c35,CloudBase Systems,Technology,45424.13,29,-0.44,1,13,0.11
+c36,FinEdge Capital,FinTech,55129.44,7,-0.68,3,104,0.54
+c37,MediVault,Healthcare,16966.26,48,-0.09,4,222,0.38
+c38,IndustrialEdge,Manufacturing,48493.42,16,0.28,8,105,0.5
+c39,BrandForge,Retail,103848.88,21,-0.08,8,71,0.55
+c40,BuildRight Materials,Manufacturing,81942.32,25,0.05,6,61,0.51
+c41,OmniChannel Co,Retail,180352.35,36,0.12,5,44,0.35
+c42,TradeFlow Systems,FinTech,113433.04,11,-0.6,7,19,0.11
+c43,MoldMaster Pro,Manufacturing,90940.7,15,-0.91,4,72,0.33
+c44,FiscalPath,FinTech,326283.2,17,-0.46,5,28,0.36
+c45,Innovate.io,Technology,96073.63,94,-0.22,4,11,0.09
+c46,MoneyMagnet Co,FinTech,46139.26,3,0.09,5,45,0.85
+c47,TaskForge,SaaS,46172.31,28,-0.4,4,3,0.05
+c48,FulfillmentHub,Retail,46301.12,49,-0.4,7,90,0.22
+c49,ProtoTech Industries,Manufacturing,27936.64,29,-0.16,11,87,0.47
+c50,AutoMation Hub,Manufacturing,362895.89,35,0.06,8,14,0.23
+c51,CareFlow Systems,Healthcare,47578.09,57,0.42,8,32,0.24
+c52,SmartFactory AI,Manufacturing,63228.97,18,-0.09,11,73,0.47
+c53,CyberShield Security,Technology,491283.91,42,-0.29,5,99,0.24
+c54,BankOS,FinTech,148721.47,13,0.36,4,93,0.75
+c55,DemandFlow,Retail,128812.68,5,0.0,4,19,0.61
+c56,AgileStack,SaaS,88517.84,36,-0.14,13,1,0.05
+c57,MetricFlow,SaaS,24405.88,10,0.43,3,2,0.47
+c58,ScaleUp Tools,SaaS,45669.07,22,0.47,3,75,0.72
+c59,NeuroLink Medical,Healthcare,47753.48,12,-0.1,6,32,0.46
+c60,WorkPilot,SaaS,43485.4,26,-0.16,5,61,0.35

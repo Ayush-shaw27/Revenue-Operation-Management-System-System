@@ -1,34 +1,37 @@
-import type React from "react"
-import "./globals.css"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AnimationProvider } from "@/components/animation-provider"
-import { AuthProvider } from "@/lib/auth-context"
-import { Toaster } from "sonner"
+import type { Metadata } from 'next';
+import localFont from 'next/font/local';
+import '../src/index.css';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = localFont({
+  src: './fonts/InterVariable-latin.woff2',
+  display: 'swap',
+  weight: '100 1000',
+  variable: '--font-inter',
+  fallback: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+});
 
-export const metadata = {
-  title: "RevOps Pro - Revenue Operations Platform",
-  description: "Professional Revenue Operations Management Platform",
-  generator: "v0.app",
-}
+export const metadata: Metadata = {
+  title: 'RevOps Pro — Revenue Operations Intelligence',
+  description: 'AI-powered revenue operations platform with predictive analytics, copilot, and real-time dashboards',
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en" className="theme-dark">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
+      <body className={`${inter.className} ${inter.variable}`}>
         <ThemeProvider>
-          <AuthProvider>
-            <AnimationProvider>{children}</AnimationProvider>
-            <Toaster position="top-right" richColors />
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

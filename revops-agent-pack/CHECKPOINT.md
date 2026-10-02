@@ -4,7 +4,7 @@ Read this + `CLAUDE.md` at the start of every session. Do the first unchecked ta
 
 ## RESUME HERE
 
-> Next task: **T-001**. Fix `frontend/src/index.css` (landing page invisible).
+> Next task: **T-002**. Recreate empty layout files.
 
 ## Rules recap
 
@@ -22,9 +22,9 @@ Read this + `CLAUDE.md` at the start of every session. Do the first unchecked ta
 - Result: git check-ignore confirms all *.db/*.log patterns ignored; no untracked .db/.log files; backup at backend/data/backups/revops-2026-09-22.db (270KB); .venv has all required packages
 
 ### T-001 — Fix `frontend/src/index.css` (landing page invisible)
-- [ ] Find the broken `@keyframes shimmer {` block (no body) and close it properly; remove the resulting orphan `}` at file end
+- [x] Find the broken `@keyframes shimmer {` block (no body) and close it properly; remove the resulting orphan `}` at file end
 - VERIFY: build the CSS and confirm `.animate-fade-up` sits at brace depth 0 (not swallowed); load `/` and see hero text without opacity 0
-- Result:
+- Result: Fixed `@keyframes shimmer {` by adding proper animation body (from { transform: translateX(-100%); } 100% { transform: translateX(100%); }). Verified braces are balanced (53 open, 53 close), `.animate-fade-up` is at brace depth 0 (not swallowed), and file ends cleanly.
 
 ### T-002 — Recreate empty layout files
 - [ ] `frontend/src/components/layout/TopBar.tsx` — title/subtitle, theme toggle, alerts bell (`api.unreadAlertCount`), user menu + logout, `Ctrl/Cmd+K` → `CommandPalette`
