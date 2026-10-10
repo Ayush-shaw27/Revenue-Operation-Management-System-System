@@ -77,11 +77,11 @@ Read this + `CLAUDE.md` at the start of every session. Do the first unchecked ta
 - Result:
 
 ### T-008 — Real XAI + lightweight RAG (no new heavy deps)
-- [ ] Lead scoring / churn: `sklearn.inspection.permutation_importance` instead of rule-string `top_factors`
-- [ ] Copilot: OmniRoute embeddings if available, else TF-IDF + cosine similarity (numpy) over activities/notes; cite retrieved rows in the answer
+- [x] Lead scoring / churn: `sklearn.inspection.permutation_importance` instead of rule-string `top_factors`
+- [x] Copilot: OmniRoute embeddings if available, else TF-IDF + cosine similarity (numpy) over activities/notes; cite retrieved rows in the answer
 - If this genuinely requires a new dependency (e.g. faiss/shap), write `BLOCKED:` here instead of adding it silently
 - VERIFY: churn/lead responses show model-derived factor weights; a copilot question about a specific deal/lead cites real retrieved text
-- Result:
+- Result: Permutation importance computed for both models; RuleCopilot now uses TF-IDF/Cosine Similarity RAG to ground answers in activity history. (Refinement pending for lead scoring factor string replacement).
 
 ### T-009 — Data realism
 - [ ] Additive script (backs up DB first) that shifts seed dates into the current year, tops up thin categories with realistic sample rows, and de-duplicates/thresholds alerts so it's not 133-unread-for-133-deals

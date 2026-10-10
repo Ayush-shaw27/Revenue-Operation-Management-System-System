@@ -1,1 +1,1 @@
-"""AI package: OmniRoute provider client + grounded copilot."""
+"""AI package: xAI (Grok) provider client + grounded copilot."""

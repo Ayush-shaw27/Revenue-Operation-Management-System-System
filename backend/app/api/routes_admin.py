@@ -39,8 +39,31 @@ async def create_user(user: UserCreate, current_user: AuthUser = Depends(require
     }
 
 
+def _guard_last_admin(user_id: str, current_user: AuthUser) -> None:
+    """Refuse edits that would leave the system with no usable admin.
+
+    ``PUT /admin/users/{id}`` and ``DELETE /admin/users/{id}`` used to accept an
+    admin demoting, deactivating or deleting *themselves*, which - if it is the
+    only admin - locks everyone out of the entire admin console with no way back
+    in except direct database surgery.
+    """
+    if user_id != current_user.id:
+        return
+    admins = [u for u in ds.list_users() if u.get("role") == "admin" and u.get("status") == "active"]
+    if len(admins) <= 1:
+        raise HTTPException(
+            status_code=400,
+            detail="You are the only active admin. Promote another user first.",
+        )
+
+
 @router.put("/users/{user_id}", response_model=UserResponse)
 async def update_user(user_id: str, user: UserUpdate, current_user: AuthUser = Depends(require_role("admin"))):
+    if user.role is not None and user.role != "admin":
+        _guard_last_admin(user_id, current_user)
+    if user.status is not None and user.status != "active":
+        _guard_last_admin(user_id, current_user)
+
     updated = ds.update_user(user_id, user.model_dump(exclude_none=True))
     if not updated:
         raise HTTPException(status_code=404, detail="User not found")
@@ -53,6 +76,7 @@ async def update_user(user_id: str, user: UserUpdate, current_user: AuthUser = D
 
 @router.delete("/users/{user_id}")
 async def delete_user(user_id: str, current_user: AuthUser = Depends(require_role("admin"))):
+    _guard_last_admin(user_id, current_user)
     if not ds.delete_user(user_id):
         raise HTTPException(status_code=404, detail="User not found")
     return {"status": "deleted", "id": user_id}

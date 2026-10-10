@@ -32,7 +32,18 @@ export default function AnimatedNumber({
     }
     const from = prevValue.current;
     const delta = value - from;
-    if (delta === 0) return;
+
+    // Must SET the value here, not just return.  React StrictMode (enabled in
+    // next.config.js) mounts, unmounts and remounts every effect in dev:
+    //   1st run  -> schedules the animation, display is still 0
+    //   cleanup  -> cancels the rAF, sets prevValue = value
+    //   2nd run  -> from === value, so delta === 0 and it returned early
+    // leaving `display` at 0 forever.  Every KPI on the dashboard rendered as
+    // "$0" while the API was returning perfectly good data.
+    if (delta === 0) {
+      setDisplay(value);
+      return;
+    }
 
     const start = performance.now() + delay;
     const tick = (now: number) => {
@@ -42,13 +53,23 @@ export default function AnimatedNumber({
       if (t < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
+        rafRef.current = null;
         prevValue.current = value;
+        setDisplay(value);
       }
     };
     rafRef.current = requestAnimationFrame(tick);
+
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      // Snap to the target on teardown.  An aborted animation must never leave
+      // a stale number on screen, and `prevValue` must only advance once the
+      // animation has actually landed on `value`.
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
       prevValue.current = value;
+      setDisplay(value);
     };
   }, [value, duration, delay, reduced]);
 

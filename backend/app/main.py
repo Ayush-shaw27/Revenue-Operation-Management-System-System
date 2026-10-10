@@ -36,6 +36,17 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     # Startup
     print("Starting RevOps Pro API...")
+
+    # Refuse to serve production traffic on a configuration that is silently
+    # unsafe (placeholder JWT secret, localhost AI gateway, ...).  In
+    # development this is a warning instead, so a fresh clone still runs.
+    try:
+        settings.assert_production_ready()
+    except RuntimeError as exc:
+        if settings.is_production:
+            raise
+        print(f"WARNING: unsafe production configuration ({exc})")
+
     init_db()
     # Populate an empty database from the CSV seed files so a fresh clone is
     # immediately usable (demo logins, sample leads/deals, model registry).

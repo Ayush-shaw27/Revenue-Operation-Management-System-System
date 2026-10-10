@@ -1,0 +1,59 @@
+# Railway deployment config for the RevOps Pro FastAPI backend.
+#
+# ---------------------------------------------------------------------------
+# WHERE THIS FILE LIVES MATTERS
+# ---------------------------------------------------------------------------
+# Railway does NOT look for this file inside your service's Root Directory.
+# It looks at /railway.toml by default. This file is at the repo root, which is
+# what the default lookup finds - so leave "Railway Config File" set to
+# /railway.toml (or blank) in the service settings.
+#
+# ---------------------------------------------------------------------------
+# SETUP
+# ---------------------------------------------------------------------------
+# 1. Railway > New Project > Deploy from GitHub repo
+# 2. Service settings > Root Directory = backend
+# 3. Variables tab (see below)
+# 4. Deploy
+#
+# All secrets go in the Variables tab, NOT in this file.
+#   JWT_SECRET_KEY      = python -c "import secrets; print(secrets.token_urlsafe(48))"
+#   XAI_API_KEY         = from https://console.x.ai   (optional - see below)
+#   ENVIRONMENT         = production
+#   CORS_ORIGINS        = https://your-frontend.up.railway.app
+#   DATABASE_URL        = see STORAGE note at the bottom
+#
+# Railway injects PORT automatically. Do not set it by hand.
+
+[build]
+# No `builder` line on purpose: Railpack is Railway's current default and
+# auto-detects Python from backend/requirements.txt. Nixpacks is legacy, and
+# naming it here is a common cause of failed builds.
+
+[deploy]
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# A cold start trains the ML models on the first request, so allow a minute.
+# Using healthcheckPath (rather than a shell command) means Railway handles the
+# port itself.
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+
+# ---------------------------------------------------------------------------
+# STORAGE - read this before going live
+# ---------------------------------------------------------------------------
+# The app defaults to SQLite at backend/data/revops.db. Railway's filesystem is
+# EPHEMERAL: every redeploy deletes the database and you restart from the seed
+# CSVs. Pick one:
+#
+# Option A - Volume (quickest, fine for a demo)
+#   Service > Volumes > Add Volume, mount path: /data
+#   then set DATABASE_URL = sqlite:////data/revops.db
+#   (four slashes: "sqlite://" plus an absolute path)
+#
+# Option B - Managed Postgres (the right answer for real use)
+#   + New > Database > PostgreSQL, then set
+#   DATABASE_URL = postgresql://USER:PASSWORD@HOST:5432/railway
+#   This project has no Alembic migrations yet, so plan on adding them.

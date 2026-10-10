@@ -1,7 +1,7 @@
 'use client';
 
 /** Login — animated, motion-first login screen (dark, glass, cursor-reactive). */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
@@ -38,6 +38,10 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // The button is disabled while loading, but Enter inside a form still fires
+    // a submit event even for a disabled submit button in some browsers, and a
+    // second `login()` would race the first for the same session.
+    if (loading) return;
     setError(null);
     setLoading(true);
     try {
@@ -50,16 +54,12 @@ export default function LoginPage() {
     }
   }
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        document.getElementById('login-submit')?.click();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-return (
+  // NOTE: there is deliberately no global `keydown` handler here.  The previous
+  // one called `login-submit.click()` on every Enter anywhere on the page, on
+  // top of the form's own submit - so pressing Enter in the password field
+  // fired two POST /api/auth/login requests at once, and the loser of the race
+  // could surface as a spurious error after a successful login.
+  return (
     <div
       className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#080A19] px-4"
       onMouseMove={handleMove}
@@ -156,7 +156,12 @@ return (
       <motion.div initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="relative z-10 mt-8">
         <Link href="/" className="text-[12.5px] text-white/40 hover:text-white/80">← Back to home</Link>
       </motion.div>
-      <motion.p initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }} className="relative z-10 mt-6 text-[11px] tracking-wide text-white/25">SECURE ENTERPRISE ACCESS · AES-256 · SOC 2 TYPE II</motion.p>
+      {/* Compliance note: only claim certifications you actually hold.
+          This previously read "SOC 2 TYPE II · AES-256".  AES-256 is true here
+          (bcrypt hashes, TLS in transit), but a SOC 2 badge is a contractual
+          representation, and printing one without an audit is a legal and
+          trust problem - not a styling one. */}
+      <motion.p initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }} className="relative z-10 mt-6 text-[11px] tracking-wide text-white/25">SECURE LOGIN · PASSWORDS HASHED WITH BCRYPT</motion.p>
     </div>
   );
 }

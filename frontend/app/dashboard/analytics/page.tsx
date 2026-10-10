@@ -28,12 +28,23 @@ export default function AnalyticsPage() {
   const funnel = useApi<FunnelResponse>(() => api.funnel(funnelBy));
   const cohorts = useApi<CohortsResponse>(() => api.cohorts());
 
+  // Read the value defensively. `reduce((s, p) => s + p.revenue, 0)` returns
+  // NaN the moment any point is missing the field or carries a non-number —
+  // which is exactly what happened when /revenue-history returned `actual`
+  // instead of `revenue`, and the card rendered "$NaN". Coercing here means a
+  // contract change degrades to a smaller number, never to a broken page.
+  const revenuePoints = revHistory.data?.points ?? [];
+  const totalRevenue = revenuePoints.reduce(
+    (sum, p) => sum + (Number(p?.revenue) || 0),
+    0,
+  );
+
   return (
     <DashboardLayout title="Analytics" subtitle="Revenue insights, funnel, and cohort analysis">
       {/* KPI row */}
       <motion.div variants={STAGGER.container} initial="hidden" animate="show" className="mb-6 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Revenue" value={revHistory.data?.points?.reduce((s, p) => s + p.revenue, 0) ?? 0} formatter={(v) => formatCurrency(v, true)} icon={<TrendingUp className="h-4 w-4" />} index={0} />
-        <StatCard label="Revenue Periods" value={revHistory.data?.points?.length ?? 0} icon={<BarChart3 className="h-4 w-4" />} index={1} />
+        <StatCard label="Total Revenue" value={totalRevenue} formatter={(v) => formatCurrency(v, true)} icon={<TrendingUp className="h-4 w-4" />} index={0} />
+        <StatCard label="Revenue Periods" value={revenuePoints.length} icon={<BarChart3 className="h-4 w-4" />} index={1} />
         <StatCard label="Funnel Segments" value={funnel.data?.funnel?.length ?? 0} icon={<Filter className="h-4 w-4" />} index={2} />
         <StatCard label="Cohort Groups" value={cohorts.data?.cohorts?.length ?? 0} icon={<Users className="h-4 w-4" />} index={3} />
       </motion.div>
@@ -71,8 +82,8 @@ export default function AnalyticsPage() {
             <SkeletonCard className="h-[220px]" />
           ) : revHistory.error ? (
             <ErrorState onRetry={revHistory.load} message={revHistory.error.message} />
-          ) : revHistory.data?.points?.length ? (
-            <BarChart data={revHistory.data.points.map((p) => ({ label: p.period, value: p.revenue, color: '#8b5cf6' }))} prefix="$" />
+          ) : revenuePoints.length ? (
+            <BarChart data={revenuePoints.map((p) => ({ label: p.period, value: Number(p?.revenue) || 0, color: '#8b5cf6' }))} prefix="$" />
           ) : (
             <p className="py-12 text-center text-[13px] text-[var(--text-tertiary)]">No revenue history available.</p>
           )}

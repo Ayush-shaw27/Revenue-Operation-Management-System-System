@@ -1,12 +1,12 @@
 """JWT authentication + role-based access control."""
 from __future__ import annotations
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 import bcrypt
+import jwt as pyjwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
 from pydantic import BaseModel
 
 from app.core.config import settings
@@ -75,21 +75,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 # ---------------------------------------------------------------------------
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire, "iat": datetime.now(timezone.utc)})
+    return pyjwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def decode_token(token: str) -> TokenData:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = pyjwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: Optional[str] = payload.get("sub")
         role: Optional[str] = payload.get("role")
         if username is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials",
                                 headers={"WWW-Authenticate": "Bearer"})
         return TokenData(username=username, role=role)
-    except JWTError:
+    except pyjwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials",
                             headers={"WWW-Authenticate": "Bearer"})
 
@@ -102,7 +102,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     from app.services.data_store import get_user
     user = get_user(token_data.username) if token_data.username else None
     if not user or user.get("status") != "active":
-        raise HTTPException(status_code=404, detail="User not found")
+        # 401, not 404.  A valid signature for a deleted or deactivated account
+        # is still an *authentication* failure, and answering 404 makes clients
+        # treat it as "endpoint missing" instead of "token no longer valid".
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is no longer active",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return to_user_model(user)
 
 

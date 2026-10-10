@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import AmbientBackground from '@/components/ui/AmbientBackground';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/cn';
 
@@ -48,9 +49,11 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)]">
+    <div className="relative min-h-screen bg-[var(--bg)] text-[var(--text-primary)]">
+      {/* Ambient animated backdrop. Sits at z-index 0, behind everything. */}
+      <AmbientBackground />
       <Sidebar />
-      <div className={cn('ml-[72px] sm:ml-[248px] min-h-screen transition-[margin] duration-300', className)}>
+      <div className={cn('relative z-10 ml-[72px] sm:ml-[248px] min-h-screen transition-[margin] duration-300', className)}>
         <TopBar title={title} subtitle={subtitle} />
         <main className="px-4 py-6 sm:px-6">
           <AnimatePresence mode="wait">

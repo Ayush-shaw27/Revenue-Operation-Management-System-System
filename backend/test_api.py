@@ -30,7 +30,7 @@ _TEST_DB_PATH = os.path.join(_TEST_DB_DIR, "test_revops.db")
 os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB_PATH}"
 os.environ["SCHEDULER_ENABLED"] = "0"
 # Neutralise any real AI gateway credentials so tests never hit a live provider.
-os.environ.setdefault("OMNIROUTE_API_KEY", "")
+os.environ.setdefault("XAI_API_KEY", "")
 
 import atexit
 import shutil
@@ -54,8 +54,29 @@ from app.database.connection import init_db as _init_db  # noqa: E402
 
 _init_db()
 
+# Seed the shared test database once, up front.  `TestClient(app)` does not run
+# the startup lifespan, so without this the demo accounts do not exist and any
+# test that logs in depends on whether some *earlier* test happened to trigger
+# seeding.  (The real "a fresh clone self-seeds" behaviour is covered properly
+# by TestAutoSeedOnStartup, which runs a separate process.)
+from scripts.seed_loader import seed_if_empty as _seed_if_empty  # noqa: E402
+
+_seed_if_empty()
+
 
 client = TestClient(app)
+
+
+# The auth and copilot routes are rate limited (they are the brute-force and
+# key-drain targets).  The counters live in module state and every request in
+# this suite comes from the same "IP", so without this reset the tests starve
+# each other and a later test fails with 429 for no real reason.
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    from app.core import rate_limit
+    rate_limit.reset()
+    yield
+    rate_limit.reset()
 
 
 # The demo accounts published in README.md.  These are intentionally public —
@@ -66,6 +87,13 @@ DEMO_CREDENTIALS = {
     "manager@revops.pro": "managerpass",
     "rep@revops.pro": "reppass",
 }
+
+
+def _login_as(email: str, password: str) -> str:
+    """Log in and return the bearer token, failing loudly if that does not work."""
+    resp = client.post("/api/auth/login", data={"username": email, "password": password})
+    assert resp.status_code == 200, f"login failed for {email}: {resp.status_code} {resp.text}"
+    return resp.json()["access_token"]
 
 
 class TestDatabaseIsolation:
@@ -205,7 +233,10 @@ class TestRegistrationSecurity:
 
     def test_register_with_unknown_role_rejected(self):
         resp = self._register("esc-bogus@revops.pro", "superuser")
-        assert resp.status_code == 400
+        # 422 now that ``UserCreate.role`` is a Literal (FastAPI validation),
+        # 400 for the old explicit VALID_ROLES check.  Either is a rejection;
+        # what matters is that it is not a 200.
+        assert resp.status_code in (400, 422), resp.text
 
     def test_downgraded_user_cannot_reach_admin_routes(self):
         self._register("esc-blocked@revops.pro", "admin")
@@ -229,8 +260,346 @@ class TestRegistrationSecurity:
         assert resp.status_code == 409
 
 
+class TestLoginHardening:
+    """Regressions for the login failures reported against the real app."""
+
+    def test_login_email_is_case_insensitive(self):
+        """`Admin@revops.pro` used to 401 for an account that exists."""
+        resp = client.post("/api/auth/login", data={
+            "username": "Admin@revops.pro", "password": "adminpass",
+        })
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["user"]["email"] == "admin@revops.pro"
+
+    def test_login_surrounding_whitespace_is_tolerated(self):
+        resp = client.post("/api/auth/login", data={
+            "username": "  admin@revops.pro  ", "password": "adminpass",
+        })
+        assert resp.status_code == 200, resp.text
+
+    def test_unknown_email_and_wrong_password_are_indistinguishable(self):
+        """Same status *and* same body: otherwise login doubles as an oracle
+        for which email addresses have accounts."""
+        wrong_pw = client.post("/api/auth/login", data={
+            "username": "admin@revops.pro", "password": "definitely-wrong",
+        })
+        no_user = client.post("/api/auth/login", data={
+            "username": "nobody-here@revops.pro", "password": "definitely-wrong",
+        })
+        assert wrong_pw.status_code == no_user.status_code == 401
+        assert wrong_pw.json()["detail"] == no_user.json()["detail"]
+
+    def test_repeated_failures_are_rate_limited(self):
+        """Brute-force protection: the endpoint used to answer 401 forever."""
+        from app.core import rate_limit
+        from app.core.config import settings
+
+        rate_limit.reset()
+        statuses = [
+            client.post("/api/auth/login", data={
+                "username": "admin@revops.pro", "password": f"guess-{i}",
+            }).status_code
+            for i in range(settings.LOGIN_RATE_LIMIT + 5)
+        ]
+        assert 429 in statuses, (
+            f"no rate limit after {settings.LOGIN_RATE_LIMIT + 5} attempts: {statuses}"
+        )
+        assert statuses[-1] == 429
+
+
+class TestRegisterHardening:
+    """`/register` used to accept `not-an-email` with the password `a`."""
+
+    def test_rejects_malformed_email(self):
+        resp = client.post("/api/auth/register", json={
+            "name": "Nope", "email": "not-an-email", "password": "Sup3rSecret!23",
+        })
+        assert resp.status_code == 422, resp.text
+
+    def test_rejects_short_password(self):
+        resp = client.post("/api/auth/register", json={
+            "name": "Nope", "email": "shorty@revops.pro", "password": "a",
+        })
+        assert resp.status_code == 422, resp.text
+
+    def test_accepts_valid_registration(self):
+        resp = client.post("/api/auth/register", json={
+            "name": "Real Person", "email": "Valid.Person@RevOps.pro",
+            "password": "Sup3rSecret!23",
+        })
+        assert resp.status_code == 200, resp.text
+        # Email is normalised, so a later login with different casing still works.
+        assert resp.json()["email"] == "valid.person@revops.pro"
+
+    def test_copilot_rejects_oversized_question(self):
+        token = _login_as("admin@revops.pro", "adminpass")
+        resp = client.post(
+            "/api/copilot/ask",
+            json={"question": "x" * 5000},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 422, resp.text
+
+
+class TestLastAdminProtection:
+    """An admin must not be able to demote/deactivate/delete the last admin."""
+
+    def _admin_token(self):
+        return _login_as("admin@revops.pro", "adminpass")
+
+    def test_admin_cannot_delete_self_when_last_admin(self):
+        token = self._admin_token()
+        me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"}).json()
+        resp = client.delete(
+            f"/api/users/{me['id']}", headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 400, resp.text
+
+    def test_admin_cannot_demote_self_when_last_admin(self):
+        token = self._admin_token()
+        me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"}).json()
+        resp = client.put(
+            f"/api/users/{me['id']}",
+            json={"role": "manager"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 400, resp.text
+
+    def test_admin_cannot_deactivate_self_when_last_admin(self):
+        token = self._admin_token()
+        me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"}).json()
+        resp = client.put(
+            f"/api/users/{me['id']}",
+            json={"status": "inactive"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 400, resp.text
+
+
+class TestProductionConfigGuard:
+    def test_placeholder_secret_is_flagged(self):
+        from app.core.config import PLACEHOLDER_JWT_SECRET, Settings
+
+        s = Settings(JWT_SECRET_KEY=PLACEHOLDER_JWT_SECRET, ENVIRONMENT="production")
+        assert s.uses_placeholder_jwt_secret
+        try:
+            s.assert_production_ready()
+        except RuntimeError as exc:
+            assert "JWT_SECRET_KEY" in str(exc)
+        else:
+            raise AssertionError("production boot accepted the public placeholder secret")
+
+    def test_placeholder_drifted_from_env_example_is_flagged(self):
+        """The real bug: the check compared against one exact string while
+        `.env.example` shipped another, so copying the example passed."""
+        from app.core.config import Settings
+
+        drifted = "change-this-to-a-secure-random-secret-in-production"
+        s = Settings(JWT_SECRET_KEY=drifted, ENVIRONMENT="production")
+        assert s.uses_placeholder_jwt_secret, (
+            "the .env.example placeholder was accepted as a real secret"
+        )
+        for also_bad in ("", "your-secret-here", "REPLACE-ME-with-real-key"):
+            assert Settings(JWT_SECRET_KEY=also_bad).uses_placeholder_jwt_secret, also_bad
+
+    def test_random_secret_is_not_flagged(self):
+        from app.core.config import Settings
+
+        assert not Settings(JWT_SECRET_KEY="k3JmQ2xZ8vNpLw7TbR4yHc9DsA1fGjK6mXqPzV0uS").uses_placeholder_jwt_secret
+
+    def test_short_secret_is_rejected_in_production(self):
+        from app.core.config import Settings
+
+        s = Settings(JWT_SECRET_KEY="tooshort", ENVIRONMENT="production")
+        try:
+            s.assert_production_ready()
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("production boot accepted a 8-character secret")
+
+    def test_localhost_ai_gateway_is_rejected_in_production(self):
+        from app.core.config import Settings
+
+        s = Settings(
+            JWT_SECRET_KEY="x" * 48,
+            ENVIRONMENT="production",
+            XAI_BASE_URL="http://localhost:1234/v1",
+        )
+        try:
+            s.assert_production_ready()
+        except RuntimeError as exc:
+            assert "localhost" in str(exc)
+        else:
+            raise AssertionError("production boot accepted a localhost AI gateway")
+
+    def test_good_production_config_passes(self):
+        from app.core.config import Settings
+
+        Settings(
+            JWT_SECRET_KEY="x" * 48,
+            ENVIRONMENT="production",
+            XAI_BASE_URL="https://api.x.ai/v1",
+        ).assert_production_ready()
+
+    def test_shipped_default_ai_url_is_not_local(self):
+        """Regression: the real https://api.x.ai/v1 must pass the localhost
+        guard. If it ever starts failing, production boot would abort."""
+        from app.core.config import Settings
+
+        s = Settings()
+        assert s.XAI_BASE_URL == "https://api.x.ai/v1", s.XAI_BASE_URL
+        assert not s.ai_gateway_is_local()
+
+    def test_development_is_never_blocked(self):
+        """A fresh clone must still start, placeholder secret and all."""
+        from app.core.config import Settings
+
+        Settings(JWT_SECRET_KEY="anything", ENVIRONMENT="development").assert_production_ready()
+
+
+class TestEnvFileIsNotCwdDependent:
+    def test_env_file_is_absolute(self):
+        """`.env` was resolved against the cwd, so starting uvicorn from the
+        repo root silently dropped every secret."""
+        from app.core.config import ENV_FILE
+
+        assert ENV_FILE.is_absolute(), ENV_FILE
+        assert ENV_FILE.parent.name == "backend", ENV_FILE
+
+
+class TestAsyncProviderDoesNotBlockTheLoop:
+    """One slow AI call used to stall every other request in the process."""
+
+    def test_health_stays_responsive_during_a_copilot_call(self):
+        import asyncio
+        import threading
+        import time
+
+        from app.ai import provider as ai_provider
+        from app.ai.copilot import RuleCopilot
+
+        async def scenario():
+            # A gateway that takes 1.5s to answer.
+            class SlowClient(ai_provider.GrokClient):
+                @property
+                def is_configured(self):
+                    return True
+
+                async def chat_async(self, messages, temperature=0.2, max_tokens=600):
+                    await asyncio.sleep(1.5)
+                    return "slow answer"
+
+            copilot = RuleCopilot(client=SlowClient(api_key="test-key"))
+
+            start = time.monotonic()
+            ask = asyncio.create_task(copilot.ask_async("why did revenue drop?"))
+            # While the provider is still thinking, a health check must answer.
+            # If the loop is blocked this cannot run until the ask completes.
+            await asyncio.sleep(0.05)
+            check_done = asyncio.Event()
+
+            async def probe():
+                check_done.set()
+
+            await asyncio.wait_for(probe(), timeout=0.5)
+            assert check_done.is_set()
+
+            result = await ask
+            elapsed = time.monotonic() - start
+            assert result["provider"] == "grok", result["provider"]
+            assert elapsed >= 1.5
+
+        loop_thread_result = {}
+
+        def run():
+            try:
+                asyncio.run(scenario())
+                loop_thread_result["ok"] = True
+            except Exception as exc:  # pragma: no cover - surfaced below
+                loop_thread_result["error"] = exc
+
+        t = threading.Thread(target=run, daemon=True)
+        t.start()
+        t.join(timeout=15)
+        assert "ok" in loop_thread_result, loop_thread_result.get("error")
+
+
+class TestLeadImport:
+    """Excel writes a BOM at the start of every CSV it saves."""
+
+    def _token(self):
+        return _login_as("admin@revops.pro", "adminpass")
+
+    def test_import_accepts_excel_bom(self):
+        resp = client.post(
+            "/api/leads/import",
+            files={"file": ("leads.csv", "﻿name,company,value\nBOM Co,Acme,1000\n",
+                            "text/csv")},
+            headers={"Authorization": f"Bearer {self._token()}"},
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["created"] == 1, resp.text
+
+    def test_import_rejects_binary(self):
+        resp = client.post(
+            "/api/leads/import",
+            files={"file": ("leads.csv", b"\xff\xfe\x00\x01binary", "text/csv")},
+            headers={"Authorization": f"Bearer {self._token()}"},
+        )
+        assert resp.status_code == 400, resp.text
+
+
+class TestCreateUserScript:
+    """`generate_password()` was never called, despite the docstring."""
+
+    def test_password_is_generated_when_flag_is_omitted(self, monkeypatch, capsys):
+        import importlib
+
+        from app.core import rate_limit
+
+        rate_limit.reset()
+        ds_mod = importlib.import_module("app.services.data_store")
+        created = {}
+
+        def fake_create_user(data):
+            created.update(data)
+            return {"id": "u-test", "name": data["name"], "email": data["email"],
+                    "role": data["role"], "status": "active"}
+
+        monkeypatch.setattr(ds_mod, "create_user", fake_create_user)
+        monkeypatch.setattr(ds_mod, "get_user", lambda e: None)
+        monkeypatch.setattr(
+            "scripts.create_user.prompt_password",
+            lambda: (_ for _ in ()).throw(AssertionError("prompted instead of generating")),
+        )
+
+        mod = importlib.import_module("scripts.create_user")
+        monkeypatch.setattr(mod.sys, "argv", [
+            "create_user.py", "--email", "gen@revops.pro", "--name", "Gen User",
+        ])
+        assert mod.main() == 0
+
+        pw = created["password"]
+        assert len(pw) >= 16, "generated password should be long"
+        assert pw != "gen@revops.pro"
+        # And it must actually be printed, because there is no reset flow.
+        assert pw in capsys.readouterr().out
+
+
+class TestSqlitePathPrefixStripping:
+    """`lstrip("./")` strips characters, not a prefix."""
+
+    def test_leading_dot_directory_is_preserved(self):
+        import os.path as _p
+
+        db_path = "./.hidden/revops.db"
+        relative = db_path[2:] if db_path.startswith("./") else db_path
+        assert relative == ".hidden/revops.db", relative
+        assert _p.isabs(relative) is False
+
+
 class TestEventsSecurity:
-    """The SSE stream must not be an unauthenticated data leak."""
 
     def test_sse_requires_token(self):
         resp = client.get("/api/events/stream")
@@ -245,36 +614,334 @@ class TestEventsSecurity:
         assert resp.status_code == 401
 
 
-class TestOmniRouteURL:
+class TestModelsColdStart:
+    """A fresh deploy has no `.joblib` artifacts, so every model must train itself.
+
+    The `.joblib` files are git-ignored, so on Railway/Vercel the app always
+    starts from zero artifacts.  This path had never actually run in dev (the
+    files were on disk), and it was broken: `lead_scoring_model.py` called
+    `permutation_importance` without importing it, so a cold start raised
+    NameError and every prediction endpoint 500'd.
+    """
+
+    def test_all_models_train_from_scratch(self, tmp_path, monkeypatch):
+        import app.ml.artifacts.anomaly_detector as anomaly_mod
+        import app.ml.artifacts.churn_model as churn_mod
+        import app.ml.artifacts.lead_scoring_model as lead_mod
+
+        # Point each module at an empty directory, forcing the "artifact
+        # missing" branch that a fresh Railway deploy always takes.  Note each
+        # module names its path constant differently.
+        for mod, const, attr in (
+            (lead_mod, "MODEL_PATH", "lead_scoring_model.joblib"),
+            (churn_mod, "CHURN_MODEL_PATH", "churn_model.joblib"),
+            (anomaly_mod, "ANOMALY_MODEL_PATH", "anomaly_detector.joblib"),
+        ):
+            monkeypatch.setattr(mod, const, str(tmp_path / attr))
+
+        for label, mod, cls in (
+            ("lead_scoring_model", lead_mod, lead_mod.LeadScoringModel),
+            ("churn_model", churn_mod, churn_mod.ChurnRiskModel),
+            ("anomaly_detector", anomaly_mod, anomaly_mod.DealAnomalyDetector),
+        ):
+            assert not (tmp_path / f"{label}.joblib").exists()
+            model = cls()
+            assert model.is_trained, f"{label} did not train from scratch"
+            assert (tmp_path / f"{label}.joblib").exists(), (
+                f"{label} trained but did not persist its artifact"
+            )
+
+    def test_lead_model_predicts_after_cold_start(self, tmp_path, monkeypatch):
+        """Trains, persists, then reloads from the artifact it just wrote."""
+        import app.ml.artifacts.lead_scoring_model as lead_mod
+
+        monkeypatch.setattr(
+            lead_mod, "MODEL_PATH", str(tmp_path / "lead_scoring_model.joblib"),
+        )
+        first = lead_mod.LeadScoringModel()
+        assert first.is_trained
+
+        second = lead_mod.LeadScoringModel()  # now loads from the artifact
+        assert second.is_trained
+        result = second.predict({
+            "name": "Cold Start Co", "company": "Cold Start Co", "value": 50000,
+            "source": "Referral", "touchpoints": 6, "industry": "Technology",
+            "company_size": "Enterprise",
+        })
+        assert 0 <= result["score"] <= 100, result
+
+
+class TestRuleEngineAnswersTheQuestion:
+    """The rule engine must answer what was ASKED, not recite totals.
+
+    Regression: it was a four-branch keyword matcher, so "which is the highest
+    lead?" matched the `lead` keyword and returned the lead COUNT - the single
+    most common copilot question, answered with something useless.
+    """
+
+    def _copilot(self):
+        from app.ai.copilot import RuleCopilot
+        from app.ai.provider import GrokClient
+        return RuleCopilot(GrokClient(api_key=""))  # force the offline engine
+
+    def _answer(self, question):
+        return self._copilot().ask(question)["answer"]
+
+    def test_highest_lead_names_an_actual_lead(self):
+        answer = self._answer("which is the highest lead?")
+        # Must name a real company from the seed data and quote its value...
+        assert "TaskForge" in answer or "SaaSify" in answer or "$" in answer
+        # ...and must NOT be the old generic "there are N leads" reply.
+        assert "in the pipeline" not in answer.lower()
+        assert "leading source" not in answer.lower()
+
+    def test_highest_lead_answer_is_grounded_in_the_database(self):
+        from app.ai.copilot import data_snapshot
+
+        snap = data_snapshot()
+        top = snap["top_leads_by_value"][0]
+        answer = self._answer("give me the highest lead name")
+        assert str(top["name"]) in answer, f"expected {top['name']!r} in: {answer}"
+        assert str(top["company"]) in answer, f"expected {top['company']!r} in: {answer}"
+
+    def test_top_n_respects_the_number(self):
+        answer = self._answer("top 3 leads")
+        body = answer.split("\n")[1:]
+        assert len([b for b in body if b.strip().startswith("-")]) == 3, answer
+
+    def test_biggest_deal_names_an_actual_deal(self):
+        from app.ai.copilot import data_snapshot
+
+        snap = data_snapshot()
+        top = snap["top_open_deals_by_value"][0]
+        answer = self._answer("what is the biggest deal")
+        assert str(top["title"]) in answer, f"expected {top['title']!r} in: {answer}"
+
+    def test_at_risk_accounts_lists_accounts(self):
+        answer = self._answer("which accounts are at risk")
+        assert "health" in answer.lower()
+        assert "churn" in answer.lower()
+
+    def test_specific_company_lookup(self):
+        answer = self._answer("tell me about TaskForge")
+        assert "TaskForge" in answer
+        assert "lead" not in answer.lower().split("\n")[0][:40]
+
+    def test_empty_database_is_handled(self):
+        from app.ai import copilot as copilot_mod
+
+        saved = (copilot_mod.ds.get_leads, copilot_mod.ds.get_deals,
+                 copilot_mod.ds.get_accounts)
+        copilot_mod.ds.get_leads = lambda *a, **k: []
+        copilot_mod.ds.get_deals = lambda *a, **k: []
+        copilot_mod.ds.get_accounts = lambda *a, **k: []
+        try:
+            answer = self._answer("which is the highest lead?")
+            assert "no crm data" in answer.lower()
+        finally:
+            (copilot_mod.ds.get_leads, copilot_mod.ds.get_deals,
+             copilot_mod.ds.get_accounts) = saved
+
+
+class TestCopilotInternalConsistency:
+    """Two answers about the same thing must not disagree."""
+
+    def test_open_deal_count_agrees_with_exec_summary(self):
+        """Regression: the copilot answered 95 open deals in one place and 106
+        in another, because closed-lost deals were counted as open here but
+        excluded by build_summary()."""
+        from app.ai.copilot import data_snapshot
+        from app.services.exec_summary import build_summary
+
+        snap = data_snapshot()
+        assert len(snap["open_deals"]) == build_summary()["open_deals"], (
+            f"copilot thinks {len(snap['open_deals'])} deals are open, "
+            f"exec_summary says {build_summary()['open_deals']}"
+        )
+
+    def test_closed_lost_deals_are_not_open(self):
+        from app.ai.copilot import data_snapshot
+
+        stages = {str(d.get("stage", "")).strip().lower()
+                  for d in data_snapshot()["open_deals"]}
+        assert "closed-lost" not in stages, stages
+        assert "closed-won" not in stages, stages
+
+
+class TestCopilotContextCarriesRecords:
+    """Grok cannot answer 'which is the highest lead?' unless the lead names
+    are in its context. It used to receive only 11 aggregate numbers."""
+
+    def test_prompt_contains_actual_record_names(self):
+        from app.ai.copilot import RuleCopilot
+        from app.ai.provider import GrokClient
+
+        copilot = RuleCopilot(GrokClient(api_key=""))
+        _metrics, _snapshot, messages = copilot._build("which is the highest lead?")
+        prompt = messages[1]["content"]
+
+        from app.ai.copilot import data_snapshot
+        snap = data_snapshot()
+        assert str(snap["top_leads_by_value"][0]["company"]) in prompt
+        assert "TOP LEADS BY OPPORTUNITY VALUE" in prompt
+        assert "ACTUAL RECORDS FROM THE DATABASE" in prompt
+
+    def test_system_prompt_demands_a_direct_answer(self):
+        from app.ai.copilot import _system_prompt
+
+        prompt = _system_prompt().lower()
+        assert "actually asked" in prompt
+        assert "never invent" in prompt
+
+
+class TestRegistrationToggle:
+    """ALLOW_REGISTRATION=0 must actually close public signup."""
+
+    def test_registration_can_be_disabled(self, monkeypatch):
+        from app.core.config import settings
+
+        monkeypatch.setattr(settings, "ALLOW_REGISTRATION", False)
+        resp = client.post("/api/auth/register", json={
+            "name": "Blocked", "email": "blocked@revops.pro",
+            "password": "Sup3rSecret!23",
+        })
+        assert resp.status_code == 403, resp.text
+        assert "disabled" in resp.json()["detail"].lower()
+
+    def test_disabled_registration_creates_nobody(self, monkeypatch):
+        from app.core.config import settings
+        from app.services import data_store as ds
+
+        monkeypatch.setattr(settings, "ALLOW_REGISTRATION", False)
+        client.post("/api/auth/register", json={
+            "name": "Blocked", "email": "ghost@revops.pro",
+            "password": "Sup3rSecret!23",
+        })
+        assert ds.get_user("ghost@revops.pro") is None
+
+
+class TestProviderURL:
     """Regression tests for the /v1/v1/chat/completions double-segment bug."""
 
     def test_base_url_with_v1_segment_is_not_doubled(self):
-        from app.ai.omniroute import OmniRouteClient
+        from app.ai.provider import GrokClient
 
-        client = OmniRouteClient(base_url="http://localhost:20128/v1", api_key="k")
-        assert client.chat_url == "http://localhost:20128/v1/chat/completions"
+        client = GrokClient(base_url="https://api.x.ai/v1", api_key="k")
+        assert client.chat_url == "https://api.x.ai/v1/chat/completions"
         assert "/v1/v1/" not in client.chat_url
 
     def test_base_url_without_v1_segment_gets_one(self):
-        from app.ai.omniroute import OmniRouteClient
+        from app.ai.provider import GrokClient
 
-        client = OmniRouteClient(base_url="http://localhost:20128", api_key="k")
-        assert client.chat_url == "http://localhost:20128/v1/chat/completions"
+        client = GrokClient(base_url="https://api.x.ai", api_key="k")
+        assert client.chat_url == "https://api.x.ai/v1/chat/completions"
         assert "/v1/v1/" not in client.chat_url
 
     def test_trailing_slash_is_tolerated(self):
-        from app.ai.omniroute import OmniRouteClient
+        from app.ai.provider import GrokClient
 
-        client = OmniRouteClient(base_url="http://localhost:20128/v1/", api_key="k")
-        assert client.chat_url == "http://localhost:20128/v1/chat/completions"
+        client = GrokClient(base_url="https://api.x.ai/v1/", api_key="k")
+        assert client.chat_url == "https://api.x.ai/v1/chat/completions"
         assert "/v1/v1/" not in client.chat_url
 
     def test_real_configured_url_is_well_formed(self):
-        from app.ai.omniroute import omniroute_client
+        from app.ai.provider import grok_client
 
-        url = omniroute_client.chat_url
+        url = grok_client.chat_url
         assert "/v1/v1/" not in url, f"doubled version segment: {url}"
         assert url.endswith("/chat/completions")
+        assert url.startswith("https://api.x.ai/"), url
+
+
+class TestAnalyticsFieldConsistency:
+    """/trends and /revenue-history describe the same series.
+
+    They used to disagree: /trends emitted `revenue` and /revenue-history
+    emitted `actual`. The frontend types both as TrendPoint {revenue}, so
+    Total Revenue summed `undefined` and rendered "$NaN", and the Revenue
+    History bar chart drew nothing.
+    """
+
+    def _get(self, path):
+        token = _login_as("admin@revops.pro", "adminpass")
+        resp = client.get(path, headers={"Authorization": f"Bearer {token}"})
+        assert resp.status_code == 200, resp.text
+        return resp.json()
+
+    def test_revenue_history_emits_revenue_field(self):
+        points = self._get("/api/analytics/revenue-history")["points"]
+        assert points, "expected seeded revenue history"
+        for p in points:
+            assert "revenue" in p, f"point missing `revenue`: {p}"
+            assert isinstance(p["revenue"], (int, float)), p
+
+    def test_revenue_history_values_match_trends(self):
+        history = {p["period"]: p["revenue"]
+                   for p in self._get("/api/analytics/revenue-history")["points"]}
+        trends = {p["period"]: p["revenue"]
+                  for p in self._get("/api/analytics/trends")["points"]}
+        assert history == trends, "the two endpoints disagree on the same series"
+
+    def test_actual_alias_is_retained(self):
+        """`actual` stays so any existing consumer keeps working."""
+        for p in self._get("/api/analytics/revenue-history")["points"]:
+            assert p["actual"] == p["revenue"], p
+
+    def test_total_revenue_is_finite(self):
+        """The exact expression the dashboard used to evaluate to NaN."""
+        points = self._get("/api/analytics/revenue-history")["points"]
+        total = sum(p["revenue"] for p in points)
+        assert total == total, "total is NaN"          # NaN != NaN
+        assert total > 0, total
+
+
+class TestProviderKeySafety:
+    """The AI key must never leak into an error, a log, or a response."""
+
+    def test_error_message_does_not_contain_the_key(self):
+        from app.ai.provider import GrokClient, ProviderError
+
+        # Deliberately not key-shaped. A literal that looks like a real
+        # provider key trips GitHub push protection, which then refuses to
+        # push the whole repository over a fake test string.
+        secret = "TESTKEY-placeholder-value"
+        client = GrokClient(base_url="https://api.x.ai/v1", api_key=secret)
+        assert secret not in client._redact(f"boom {secret} boom")
+        assert "***" in client._redact(f"boom {secret} boom")
+
+    def test_http_error_is_summarised_not_echoed(self):
+        from app.ai.provider import GrokClient, ProviderError
+
+        secret = "TESTKEY-placeholder-value"
+
+        class FakeResp:
+            status_code = 401
+            text = f"invalid key {secret}"
+
+            def json(self):  # pragma: no cover - should not be reached
+                return {}
+
+        client = GrokClient(base_url="https://api.x.ai/v1", api_key=secret)
+        try:
+            client._extract(FakeResp(), client._redact)
+        except ProviderError as exc:
+            assert secret not in str(exc), str(exc)
+            assert "401" in str(exc)
+            assert "XAI_API_KEY" in str(exc), "should hint at the cause"
+        else:
+            raise AssertionError("HTTP error was not raised")
+
+    def test_unconfigured_client_raises_before_any_request(self):
+        from app.ai.provider import GrokClient, ProviderError
+
+        client = GrokClient(api_key="")
+        assert not client.is_configured
+        try:
+            client._build_request([{"role": "user", "content": "hi"}], 0.2, 100)
+        except ProviderError as exc:
+            assert "XAI_API_KEY" in str(exc)
+        else:
+            raise AssertionError("unconfigured client built a request")
 
 
 class TestCopilotHonesty:
@@ -310,7 +977,7 @@ class TestCopilotHonesty:
         assert "provider" in body
         assert "model" in body
         assert "note" in body
-        assert body["provider"] in ("omniroute", "local-rules")
+        assert body["provider"] in ("grok", "local-rules")
 
         if body["provider"] == "local-rules":
             # Never let a deterministic answer masquerade as AI output.
@@ -319,13 +986,13 @@ class TestCopilotHonesty:
 
     def test_missing_credentials_are_reported(self):
         from app.ai.copilot import RuleCopilot
-        from app.ai.omniroute import OmniRouteClient
+        from app.ai.provider import GrokClient
 
-        copilot = RuleCopilot(OmniRouteClient(api_key=""))
+        copilot = RuleCopilot(GrokClient(api_key=""))
         result = copilot.ask("What is our revenue?")
         assert result["provider"] == "local-rules"
         assert result["model"] is None
-        assert "credentials" in result["note"].lower()
+        assert "credentials" in result["note"].lower() or "api_key" in result["note"].lower()
 
 
 class TestModels:

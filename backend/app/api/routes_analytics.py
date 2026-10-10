@@ -84,12 +84,26 @@ async def analytics_trends(current_user: AuthUser = Depends(get_current_user)):
 
 @router.get("/revenue-history")
 async def revenue_history(current_user: AuthUser = Depends(get_current_user)):
+    """Monthly closed-won revenue.
+
+    Field naming: this used to emit only ``actual`` while ``/trends`` emitted
+    ``revenue``.  The frontend types both responses as ``TrendPoint {revenue}``,
+    so it read ``p.revenue`` here, got ``undefined`` for every point, and the
+    Total Revenue card summed to NaN ("$NaN") while the bar chart rendered
+    empty.  Both names are now emitted - ``revenue`` matches /trends and the
+    shared type, and ``actual`` is kept as an alias for existing consumers.
+    """
     deals = ds.get_deals()
     monthly = _monthly_revenue(deals)
     points = [
-        {"period": month, "actual": round(value, 2), "count": sum(
-            1 for d in deals if d.get("stage") == "closed-won"
-            and (d.get("close_date") or "")[:7] == month)}
+        {
+            "period": month,
+            "revenue": round(value, 2),
+            "actual": round(value, 2),
+            "count": sum(
+                1 for d in deals if d.get("stage") == "closed-won"
+                and (d.get("close_date") or "")[:7] == month),
+        }
         for month, value in sorted(monthly.items())
     ]
     return {"points": points}

@@ -64,7 +64,15 @@ async def create_lead(lead: LeadCreate, current_user: AuthUser = Depends(get_cur
 
 @router.post("/leads/import")
 async def import_leads(file: UploadFile = File(...), current_user: AuthUser = Depends(get_current_user)):
-    content = (await file.read()).decode("utf-8")
+    raw = await file.read()
+    # `utf-8-sig`, not `utf-8`: any CSV saved by Excel on Windows starts with a
+    # BOM, which plain utf-8 leaves in place and turns the first header into
+    # "﻿name".  Every row then failed with "missing name or company".
+    try:
+        content = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise HTTPException(status_code=400, detail="File is not valid UTF-8 text.")
+    content = content.replace("\r\n", "\n").replace("\r", "\n")
     reader = csv.DictReader(io.StringIO(content))
     created = 0
     errors: List[str] = []

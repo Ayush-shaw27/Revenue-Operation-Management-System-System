@@ -1,13 +1,14 @@
-# RevOps Platform
+﻿# RevOps Platform
 
-AI-powered Revenue Operations platform with predictive lead scoring, churn detection, anomaly detection, revenue forecasting, and an intelligent copilot — backed by a FastAPI + SQLite backend and a Next.js 15 frontend.
+AI-powered Revenue Operations platform with predictive lead scoring, churn detection, anomaly detection, revenue forecasting, and an intelligent copilot (Grok / xAI) — backed by a FastAPI + SQLite backend and a Next.js 15 frontend.
 
 ---
 
 ## Table of Contents
 
-- [Demo Accounts](#demo-accounts)
+- [Demo Accounts](#demo-accounts) ← **start here to log in**
 - [Quick Start](#quick-start)
+- [Deploy to Railway](#deploy-to-railway)
 - [Architecture](#architecture)
 - [API Endpoints](#api-endpoints)
 - [Frontend Routes](#frontend-routes)
@@ -38,24 +39,49 @@ These accounts are seeded automatically the first time the backend starts (from
 
 | Surface              | Where                                                | Username field        | Password |
 | -------------------- | ---------------------------------------------------- | --------------------- | -------- |
-| Web app login        | <http://localhost:3000/login>                        | the email address     | as above |
-| Swagger *Authorize*  | <http://127.0.0.1:8000/docs>                         | the email address     | as above |
+| Web app login        | `http://localhost:3000/login` (or your deployed URL) | the email address     | as above |
+| Swagger *Authorize*  | `http://127.0.0.1:8000/docs`                         | the email address     | as above |
 | API (curl)           | `POST http://127.0.0.1:8000/api/auth/login`          | `username=` the email | as above |
 
-**Never stored in this repository:** `JWT_SECRET_KEY` and `OMNIROUTE_API_KEY`.
-Copy `backend/.env.example` to `backend/.env` and set your own values.
+**Email case does not matter** — `Admin@RevOps.Pro` works the same as
+`admin@revops.pro`. Leading/trailing spaces are stripped too.
 
-### Verifying the credentials yourself
+### Logging in via the browser
 
-Passwords are bcrypt-hashed, so you can confirm the table above is correct for
-your clone at any time:
+1. Open the app (locally `http://localhost:3000`, or your deployed URL).
+2. Go to `/login` — the landing page's **Sign in** button takes you there.
+3. Type the **email address** in the first box (e.g. `admin@revops.pro`).
+4. Type the **password** in the second box (e.g. `adminpass`).
+5. Press **Sign in**, or just press `Enter`.
+6. You land on `/dashboard`. Admin accounts also get `/dashboard/admin`.
+
+There is **no signup page**. Accounts are created by an admin or from the CLI —
+see [Creating accounts](#creating-accounts).
+
+### Logging in from the command line
+
+```bash
+# Get a token
+curl -X POST http://127.0.0.1:8000/api/auth/login \
+  -d "username=admin@revops.pro&password=adminpass"
+
+# Use it
+curl http://127.0.0.1:8000/api/leads -H "Authorization: Bearer <access_token>"
+```
+
+Or check that the credentials work for your clone without starting the server:
 
 ```bash
 cd backend
 python -c "from app.services import data_store as ds; print(ds.verify_user_password('admin@revops.pro','adminpass'))"
 ```
 
-`True` means `adminpass` is the working password for the seeded admin.
+`True` means `adminpass` is the working password for the seeded admin. Passwords
+are bcrypt-hashed, so the plaintext above appears only in this README and the
+seed CSV — never in the database.
+
+**Never stored in this repository:** `JWT_SECRET_KEY` and `XAI_API_KEY`.
+Copy `backend/.env.example` to `backend/.env` and set your own values.
 
 ---
 
@@ -96,6 +122,9 @@ source .venv/bin/activate          # macOS / Linux
 
 pip install -r requirements.txt
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+# In your backend terminal
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+
 ```
 
 **Frontend**
@@ -136,9 +165,106 @@ python scripts/create_user.py --email you@revops.pro --name "Your Name" --role a
 Valid roles: `admin`, `manager`, `sales-executive`.
 There is no password-reset flow, so copy a generated password immediately.
 
+Pass `--prompt` if you'd rather type the password yourself (hidden input)
+instead of using the generated one.
+
 A `POST /api/auth/register` endpoint also exists for programmatic signup, but
 it is not wired to the UI and always forces the `sales-executive` role —
-self-registration can never grant `admin` or `manager`.
+self-registration can never grant `admin` or `manager`. Set
+`ALLOW_REGISTRATION=0` to close it entirely (recommended before sharing a
+public URL).
+
+---
+
+## Deploy to Railway
+
+Two services: the FastAPI backend on **Railway**, the Next.js frontend on
+**Vercel** (or Railway too). The split matters — the backend is the only thing
+that ever sees your AI key.
+
+### 1. Push the code
+
+```bash
+git add -A
+git commit -m "Railway + Grok deployment"
+git remote add origin https://github.com/<you>/<repo>.git
+git push -u origin main
+```
+
+### 2. Backend on Railway
+
+1. **New Project → Deploy from GitHub repo**, pick your repo.
+2. On the service, set **Root Directory** to `backend`.
+   Railway reads [`railway.toml`](backend/../railway.toml) from the repo root
+   automatically — it starts uvicorn on `$PORT`, which is all you need.
+3. Add these under **Variables**:
+
+   | Variable         | Value                                                            |
+   | ---------------- | ---------------------------------------------------------------- |
+   | `JWT_SECRET_KEY` | `python -c "import secrets; print(secrets.token_urlsafe(48))"`     |
+   | `XAI_API_KEY`    | Your key from <https://console.x.ai>                             |
+   | `ENVIRONMENT`    | `production`                                                      |
+   | `ALLOW_REGISTRATION` | `0` — see below                                             |
+
+   Railway sets `PORT` itself. Do not set it by hand.
+
+4. **CORS** — set `CORS_ORIGINS` to your frontend URL **once you have it**
+   (step 3 below), e.g. `https://your-app.vercel.app`. Only your real
+   frontend origin belongs there. With `ENVIRONMENT=production` the app
+   refuses to boot on a placeholder `JWT_SECRET_KEY`, so step 3 is mandatory,
+   not optional.
+
+5. **Storage — read this.** The app defaults to SQLite, and Railway's
+   filesystem is **ephemeral**: every redeploy deletes the database and you
+   restart from the seed CSVs. Choose one:
+
+   - **Volume (quickest, fine for a demo).** Service → **Volumes → Add
+     Volume**, mount path `/data`. Then set
+     `DATABASE_URL=sqlite:////data/revops.db` (four slashes — the first three
+     are the scheme, the fourth makes `/data` an absolute path).
+   - **Postgres (correct for real use).** Add a PostgreSQL plugin and set
+     `DATABASE_URL=postgresql://user:pass@host:5432/railway`. This project has
+     **no Alembic migrations yet**, so plan on adding them.
+
+6. Deploy. Railway prints a URL like `https://revops-backend.up.railway.app`.
+   Check it with `https://revops-backend.up.railway.app/health` — you should
+   see `"status": "healthy"`.
+
+> The first request after a cold start trains the ML models (they are
+> git-ignored, so every fresh container starts without artifacts). This takes a
+> few seconds; the healthcheck allows 60s for it.
+
+### 3. Frontend on Vercel
+
+1. Import the same repo, set **Root Directory** to `frontend`.
+2. Environment variable: `NEXT_PUBLIC_API_URL=https://revops-backend.up.railway.app`
+3. Deploy.
+4. Copy the Vercel URL back into the backend's `CORS_ORIGINS` and **redeploy
+   the backend** — CORS is read at startup.
+
+### 4. Before you share the public link
+
+Do these three things, or the first stranger can cost you money or take over
+the app:
+
+| Step                    | Why                                                             |
+| ----------------------- | --------------------------------------------------------------- |
+| `ALLOW_REGISTRATION=0`  | Otherwise anyone can self-register and spend your Grok balance |
+| Change the demo passwords | `adminpass` is printed in this README — it is public         |
+| Set a spend cap at x.ai  | A hard ceiling if anything slips through                        |
+
+The demo passwords are deliberately public so a reviewer can log in. That is a
+fair trade for a demo, and an unacceptable one for anything real.
+
+### Troubleshooting Railway
+
+| Symptom                                   | Cause / fix                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| Health check fails, service won't start   | `ENVIRONMENT=production` with a placeholder `JWT_SECRET_KEY` — read the deploy logs, it names the variable |
+| Frontend loads, every API call fails      | Wrong `NEXT_PUBLIC_API_URL`, or `CORS_ORIGINS` not set to the Vercel URL. Check the browser console for a CORS error |
+| Backend returns 401 for valid credentials | Wrong `JWT_SECRET_KEY` — changing it invalidates every issued token; redeploy and log in again |
+| Data disappears after each deploy         | No volume/Postgres attached. See step 5                                |
+| Copilot always answers `local-rules`      | `XAI_API_KEY` not set. The response `note` field says which, and never pretends |
 
 ---
 
@@ -149,7 +275,7 @@ revops-platform/
 ├── backend/          # Python FastAPI backend (127.0.0.1:8000)
 │   ├── app/
 │   │   ├── api/      # REST route handlers (auth, crm, ml, alerts, admin, ...)
-│   │   ├── ai/       # Copilot client (OmniRoute + offline rule fallback)
+│   │   ├── ai/       # Copilot client (Grok/xAI + offline rule fallback)
 │   │   ├── core/     # Config, security (JWT + bcrypt)
 │   │   ├── database/ # SQLAlchemy models & connection
 │   │   ├── ml/       # ML models (lead scoring, churn, anomaly, forecast)
@@ -176,7 +302,7 @@ revops-platform/
 | Layer    | Technology                                                                   |
 | -------- | ---------------------------------------------------------------------------- |
 | Backend  | Python 3.10+, FastAPI, Uvicorn, SQLAlchemy 2, SQLite                          |
-| Auth     | OAuth2 password flow, JWT (`python-jose`), bcrypt hashing                    |
+| Auth     | OAuth2 password flow, JWT (`PyJWT`), bcrypt hashing                      |
 | ML       | scikit-learn (RandomForest, GradientBoosting, IsolationForest, Ridge/Linear) |
 ## API Endpoints
 
@@ -316,7 +442,7 @@ Deals are managed from `/dashboard/pipeline` — there is no separate
 | GET    | `/api/predict/next-best-actions`            | NBAs (all deals)         | Bearer |
 | GET    | `/api/predict/next-best-actions/{deal_id}`  | NBA (one deal)           | Bearer |
 
-| AI       | OmniRoute-compatible OpenAI client, with an offline rule-based fallback      |
+| AI       | xAI (Grok) over the OpenAI-compatible `/chat/completions` API, with an offline rule-based fallback |
 | Frontend | Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS                  |
 | Charts   | Chart.js via `react-chartjs-2`                                               |
 | Motion   | Framer Motion                                                                |
@@ -336,21 +462,26 @@ Copy `backend/.env.example` to `backend/.env` and customise as needed.
 | Variable             | Default                                      | Description                           |
 | -------------------- | -------------------------------------------- | ------------------------------------- |
 | `DATABASE_URL`       | `sqlite:///./data/revops.db`                 | Database connection string            |
-| `JWT_SECRET_KEY`     | `change-this-to-a-secure-random-secret`      | JWT signing secret — **set your own** |
+| `JWT_SECRET_KEY`     | *(placeholder — startup aborts in prod)*     | JWT signing secret — **set your own** |
 | `JWT_EXPIRE_MINUTES` | `480`                                        | Token lifetime in minutes             |
-| `OMNIROUTE_BASE_URL` | `http://localhost:8080`                      | AI provider base URL                  |
-| `OMNIROUTE_API_KEY`  | `your-omni-route-api-key`                    | AI provider key — **set your own**    |
-| `OMNIROUTE_MODEL`    | `revops-ai-v1`                               | AI model name                         |
-| `CORS_ORIGINS`       | `http://localhost:3000,http://localhost:8080` | Comma-separated allowed origins       |
-| `ENVIRONMENT`        | `development`                                | `development` enables Uvicorn reload  |
+| `XAI_BASE_URL`       | `https://api.x.ai/v1`                        | xAI API base URL                      |
+| `XAI_API_KEY`        | *(empty — copilot falls back to rules)*      | AI provider key — **set your own**    |
+| `XAI_MODEL`          | `grok-4.7`                                   | AI model name                         |
+| `XAI_TIMEOUT_SECONDS`| `30.0`                                       | Provider call timeout                 |
+| `CORS_ORIGINS`       | `http://localhost:3000`                      | Comma-separated allowed origins       |
+| `ENVIRONMENT`        | `development`                                | `production` enables startup safety checks |
+| `ALLOW_REGISTRATION` | `1`                                          | Set `0` to close public signup        |
 | `SCHEDULER_ENABLED`  | `0`                                          | Set to `1` to enable APScheduler      |
+| `LOGIN_RATE_LIMIT`   | `30`                                         | Login attempts per IP per window      |
+| `COPILOT_RATE_LIMIT` | `20`                                         | Copilot questions per IP per minute   |
 
 > `.env` is git-ignored. `.env.example` is committed and contains only
 > placeholders — never commit a populated `.env`.
 
-The AI copilot works **without** OmniRoute credentials by falling back to a
-built-in rule-based responder. Every copilot response declares its `provider`,
-`model`, and a `note` so you can always tell which engine answered.
+The AI copilot works **without** `XAI_API_KEY` by falling back to a built-in
+rule-based responder. Every copilot response declares its `provider`
+(`grok` or `local-rules`), `model`, and a `note`, so you can always tell which
+engine answered — it never pretends.
 
 ### Frontend
 
@@ -375,7 +506,7 @@ cd backend
 python -m pytest test_api.py -v --tb=short
 ```
 
-Expected: **47 passed**.
+Expected: **79 passed**.
 
 Frontend type check and production build:
 
@@ -410,9 +541,9 @@ deviation of those out-of-sample residuals. If there is too little history the
 API returns an honest "insufficient data" forecast with zero totals rather than
 inventing numbers.
 
-**AI copilot** — a natural-language RevOps assistant. Uses OmniRoute when
-`OMNIROUTE_API_KEY` is configured, otherwise a local rule-based engine. Each
-response states its `provider`, `model`, and an explanatory `note`.
+**AI copilot** — a natural-language RevOps assistant. Uses Grok (xAI) when
+`XAI_API_KEY` is configured, otherwise a local rule-based engine. Each response
+states its `provider`, `model`, and an explanatory `note`.
 
 **Next-best-action** — rule-based recommendations for stalled and at-risk deals.
 
@@ -435,16 +566,33 @@ response reports when the measurement window started.
 `NEXT_PUBLIC_API_URL=http://127.0.0.1:8000` in `frontend/.env.local` and restart
 the dev server.
 
-**Login 401 despite the right password** — the seeded `users.csv` can go stale.
-Delete `backend/data/revops.db*` and restart to re-seed, or create a known-good
-account with `python scripts/create_user.py`.
+**Login 401 despite the right password** — check, in order:
+
+1. You are hitting the backend you think you are. A stale server on port 8000
+   is the usual cause:
+   ```powershell
+   netstat -ano | findstr :8000
+   taskkill /PID <pid> /F
+   ```
+2. Test the API directly, bypassing the browser:
+   ```powershell
+   Invoke-WebRequest -Uri "http://127.0.0.1:8000/api/auth/login" -Method POST -Body @{username="admin@revops.pro";password="adminpass"} -UseBasicParsing
+   ```
+   A `200` means the backend is fine and the problem is the frontend. A
+   connection error means it is not running. A `429` means you hit the login
+   rate limit — wait 5 minutes.
+3. The seed data may be stale. Delete `backend/data/revops.db*` and restart to
+   re-seed, or create a known-good account with `python scripts/create_user.py`.
+4. The login page now reports the real reason (bad password vs. rate limited
+   vs. server error vs. backend unreachable) instead of always saying
+   "Incorrect email or password".
 
 **`no such table` on first startup** — already fixed: the revenue forecast model
 tolerates a missing database at import time instead of querying `deals` before
 `init_db()` runs.
 
 **Copilot says it cannot reach the provider** — expected without
-`OMNIROUTE_API_KEY`; it falls back to the rule engine and says so in the
+`XAI_API_KEY`; it falls back to the rule engine and says so in the
 response `note`.
 
 **Admin stats show low request counts or odd latency** — counters live in memory
@@ -468,14 +616,25 @@ rm -f backend/data/revops.db*             # drop the database
   can log in. Anyone holding them has full admin access. Never deploy this
   configuration to a reachable environment.
 - **Before any real deployment:** set a unique `JWT_SECRET_KEY`, provide a
-  proper `OMNIROUTE_API_KEY`, change or delete the seeded demo accounts, and
-  terminate TLS in front of the API.
+  proper `XAI_API_KEY`, change or delete the seeded demo accounts, and
+  terminate TLS in front of the API. Setting `ENVIRONMENT=production` makes
+  the app refuse to boot if the JWT secret is still a placeholder.
+- **The AI key never reaches the browser.** It is read only in
+  `backend/app/ai/provider.py` from the environment, is never logged, and is
+  redacted out of any error text. Never put it in a `NEXT_PUBLIC_*` variable —
+  those are compiled into the browser bundle.
+- **Copilot is rate limited** (20 questions/minute/IP) and questions are
+  capped at 2000 characters, so one visitor cannot drain the key quickly.
 - **Passwords are bcrypt-hashed** at rest — the plaintext values above appear
   only in this README and the seed CSV, never in the database.
+- **Login is rate limited** per IP (30 attempts per 5 minutes). If several
+  people share one IP, raise `LOGIN_RATE_LIMIT` or they will lock each other
+  out.
 - **The SSE stream requires a valid JWT.** Unauthenticated, invalid, expired, or
   inactive-user tokens are rejected.
-- **`.env`, `.db`, and `.venv` files are git-ignored.** Only `.env.example`
-  templates are committed.
+- **`.env`, `.db`, `.venv`, and `.joblib` files are git-ignored.** Only
+  `.env.example` templates are committed. Model artifacts retrain themselves
+  on first use.
 - **Self-registration cannot escalate privileges.** Requesting `admin` or
   `manager` at `/api/auth/register` is silently downgraded to
   `sales-executive`.

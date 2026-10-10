@@ -45,6 +45,45 @@ const REQUEST_TIMEOUT_MS = 15000;
 
 class TimeoutError extends Error {}
 
+/**
+ * Turn a failed login response into a message that names the actual problem.
+ *
+ * Only 401/403 say "wrong credentials".  Everything else is a bug or a
+ * deployment problem, and telling the user their password is wrong when it is
+ * not sends them into an endless retry loop against a server that is fine.
+ */
+async function loginErrorMessage(resp: Response): Promise<string> {
+  let detail = '';
+  try {
+    const body = await resp.json();
+    if (typeof body?.detail === 'string') detail = body.detail;
+  } catch {
+    /* non-JSON error body */
+  }
+
+  switch (resp.status) {
+    case 401:
+    case 403:
+      return 'Incorrect email or password.';
+    case 422:
+      return detail
+        ? `The server rejected the request: ${detail}`
+        : 'The server rejected the request as invalid (HTTP 422).';
+    case 429: {
+      const retry = resp.headers.get('Retry-After');
+      return retry
+        ? `Too many attempts. Try again in ${retry} seconds.`
+        : 'Too many attempts. Please wait and try again.';
+    }
+    case 404:
+      return `Login endpoint not found at ${API_BASE}. Check NEXT_PUBLIC_API_URL points at the backend.`;
+    default:
+      return resp.status >= 500
+        ? `The server had an internal error (HTTP ${resp.status}). Check the backend logs.`
+        : `Login failed (HTTP ${resp.status}).`;
+  }
+}
+
 async function fetchWithTimeout(
   url: string,
   init: RequestInit = {},
@@ -119,7 +158,7 @@ export const api = {
   // ---- Auth -------------------------------------------------------------
   async login(email: string, password: string): Promise<LoginResponse> {
     const body = new URLSearchParams();
-    body.set('username', email);
+    body.set('username', email.trim().toLowerCase());
     body.set('password', password);
     const resp = await fetchWithTimeout(`${API_BASE}/api/auth/login`, {
       method: 'POST',
@@ -127,7 +166,13 @@ export const api = {
       body: body.toString(),
     });
     if (!resp.ok) {
-      throw new ApiError(resp.status, 'Incorrect email or password');
+      // Was a blanket `throw new ApiError(resp.status, 'Incorrect email or
+      // password')`, so a 422 (malformed form), a 429 (rate limited), a 500
+      // (server crash) and a 401 all showed the same "wrong password" text.
+      // The user then retyped a correct password and still could not tell what
+      // was actually wrong.  Keep 401 ambiguous on purpose - that is the only
+      // response that should claim the credentials were wrong.
+      throw new ApiError(resp.status, await loginErrorMessage(resp));
     }
     const data = (await resp.json()) as LoginResponse;
     if (typeof window !== 'undefined') {

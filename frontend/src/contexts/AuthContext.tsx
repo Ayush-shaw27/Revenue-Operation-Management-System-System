@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { api, getStoredUser } from '@/api/client';
+import { api, ApiError, getStoredUser } from '@/api/client';
 import type { User } from '@/api/types';
 
 interface AuthContextValue {
@@ -36,9 +36,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('revops_user', JSON.stringify(fresh));
       }
-    } catch {
-      api.logout();
-      setUser(null);
+    } catch (err) {
+      // Only a rejected token should end the session.  The previous version
+      // logged the user out on *any* throw, including a 500 from a restarting
+      // backend and the network error you get when you close the laptop lid -
+      // so a working session was silently destroyed by an outage.
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+        api.logout();
+        setUser(null);
+        return;
+      }
+      // Transient failure: keep the cached user so a blip does not kick the
+      // user out.  The token stays, and the next call will re-validate it.
     }
   }, []);
 

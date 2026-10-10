@@ -18,7 +18,11 @@ if "sqlite" in _database_url and "///" in _database_url:
     if not os.path.isabs(db_path):
         # connection.py lives at backend/app/database/ → project root is 3 levels up.
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        db_path = os.path.join(project_root, db_path.lstrip("./"))
+        # `lstrip("./")` would strip *characters*, not a prefix: it turns
+        # ".hidden/x.db" into "hidden/x.db" and silently eats a leading "../".
+        # Remove the exact "./" prefix instead and leave everything else alone.
+        relative = db_path[2:] if db_path.startswith("./") else db_path
+        db_path = os.path.join(project_root, relative)
         _database_url = f"sqlite:///{db_path}"
 
 engine = create_engine(

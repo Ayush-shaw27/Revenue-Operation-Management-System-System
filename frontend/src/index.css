@@ -213,6 +213,108 @@ body {
 }
 
 /* ==========================================================================
+   Ambient animated background (dashboard shell)
+   --------------------------------------------------------------------------
+   Pure CSS keyframes on transform/opacity only, so they run on the compositor
+   and never trigger a layout or repaint.  The whole layer is pointer-events-none
+   and sits at z-index 0 behind the content.  The global prefers-reduced-motion
+   rule below neutralises every one of these for users who ask for it.
+   ========================================================================== */
+
+@keyframes drift-slow {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(6%, -4%, 0) scale(1.08); }
+  66%      { transform: translate3d(-5%, 5%, 0) scale(0.94); }
+}
+
+@keyframes drift-slower {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(-7%, 6%, 0) scale(1.12); }
+}
+
+@keyframes grid-pan {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-48px, -48px, 0); }
+}
+
+@keyframes beam-sweep {
+  0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  18%  { opacity: 0.5; }
+  50%  { opacity: 0.28; }
+  82%  { opacity: 0.5; }
+  100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+}
+
+@keyframes ring-breathe {
+  0%, 100% { transform: scale(0.85); opacity: 0.10; }
+  50%      { transform: scale(1.15); opacity: 0.22; }
+}
+
+.revops-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.revops-bg__orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+.revops-bg__grid {
+  position: absolute;
+  /* Larger than the viewport so panning never exposes an edge. */
+  inset: -60px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
+  animation: grid-pan 26s linear infinite;
+  will-change: transform;
+}
+
+.revops-bg__ring {
+  position: absolute;
+  border-radius: 9999px;
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  animation: ring-breathe 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.revops-bg__beam {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 42%;
+  height: 140%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(6, 182, 212, 0.055) 45%,
+    rgba(167, 139, 250, 0.055) 55%,
+    transparent
+  );
+  animation: beam-sweep 16s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Light theme: keep the grid and beams far fainter or they muddy the text. */
+.theme-light .revops-bg__grid {
+  background-image:
+    linear-gradient(to right, rgba(10, 10, 12, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 10, 12, 0.045) 1px, transparent 1px);
+}
+.theme-light .revops-bg__orb { filter: blur(100px); }
+.theme-light .revops-bg__beam { opacity: 0.4; }
+
+/* ==========================================================================
    Accessibility — prefers-reduced-motion
    ========================================================================== */
 

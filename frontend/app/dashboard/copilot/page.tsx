@@ -136,7 +136,7 @@ export default function CopilotPage() {
           </motion.button>
         </form>
         <p className="mt-2 text-center text-[11px] text-[var(--text-tertiary)]">
-          Answers are grounded in your live data. Powered by OmniRoute AI.
+          Answers are grounded in your live data. Powered by Grok (xAI).
         </p>
       </div>
     </DashboardLayout>

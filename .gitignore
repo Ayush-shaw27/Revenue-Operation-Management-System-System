@@ -13,7 +13,10 @@ node_modules/
 *.db
 *.db-shm
 *.db-wal
+*.db.backup-*
 *.log
+*.joblib
+tsconfig.tsbuildinfo
 .pytest_cache/
 .kilo/
 LOOP_LOG.md

@@ -5,6 +5,7 @@ Usage
     python scripts/create_user.py --email admin@revops.pro --name "Alex Admin" --role admin
     python scripts/create_user.py --email rep@revops.pro --name "Sam Rep" --role sales-executive
     python scripts/create_user.py --email temp@revops.pro --name "Temp User"   # random password
+    python scripts/create_user.py --email me@revops.pro --name "Me" --prompt   # type it instead
 
 If ``--password`` is omitted a strong random password is generated and printed
 once — there is no password reset flow, so copy it from the output.
@@ -62,7 +63,15 @@ def main() -> int:
         default=None,
         help="Password. Omit to generate a strong random one and print it.",
     )
+    parser.add_argument(
+        "--prompt",
+        action="store_true",
+        help="Type the password interactively instead of generating one.",
+    )
     args = parser.parse_args()
+
+    if args.password and args.prompt:
+        raise SystemExit("Error: use either --password or --prompt, not both.")
 
     email = args.email.strip().lower()
     if "@" not in email or email.startswith("@") or email.endswith("@"):
@@ -71,8 +80,18 @@ def main() -> int:
     if ds.get_user(email):
         raise SystemExit(f"Error: a user with email '{email}' already exists.")
 
-    generated = args.password is None
-    password = args.password or prompt_password()
+    # The old code did `password = args.password or prompt_password()` and then
+    # set `generated = args.password is None` - so omitting --password *always*
+    # prompted, `generate_password()` was never called, and the password the
+    # admin typed was echoed back labelled "generated".  Generate by default
+    # (which is what the docstring promised) and require --prompt to type one.
+    generated = args.password is None and not args.prompt
+    if args.password is not None:
+        password = args.password
+    elif args.prompt:
+        password = prompt_password()
+    else:
+        password = generate_password()
     if len(password) < 8:
         raise SystemExit("Error: password must be at least 8 characters.")
 

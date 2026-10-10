@@ -56,7 +56,8 @@ class ChurnRiskModel:
         self.model.fit(df, y)
         # Compute permutation importance
         result = permutation_importance(self.model, df, y, n_repeats=5, random_state=7, n_jobs=-1)
-        self._feature_importances = result.importances_mean
+        self.feature_names = df.columns.tolist()
+        self._feature_importances = dict(zip(self.feature_names, result.importances_mean))
         self._accuracy = float(np.mean(self.model.predict(df) == y))
         self.is_trained = True
         self._save()
@@ -137,8 +138,7 @@ class ChurnRiskModel:
     def _confidence(risk_score: float) -> int:
         return int(np.clip(round(60 + abs(risk_score - 0.5) * 70), 60, 96))
 
-    @staticmethod
-    def _explain_factors(account: Dict[str, Any], risk_score: float) -> List[Dict[str, Any]]:
+    def _explain_factors(self, account: Dict[str, Any], risk_score: float) -> List[Dict[str, Any]]:
         factors: List[Dict[str, Any]] = []
         last_active = float(account.get("last_activity_days", 30))
         trend = float(account.get("usage_trend", 0))
@@ -146,27 +146,38 @@ class ChurnRiskModel:
         renewal = float(account.get("renewal_in_days", 90))
         value = float(account.get("contract_value", 50000))
 
+        importances = getattr(self, "_feature_importances", {})
+
+        def _get_w(feat_name: str, base_weight: float) -> float:
+            # Multiply heuristic weight by the model's measured feature importance
+            imp = importances.get(feat_name, 0.2) # default to 0.2 if unknown
+            return round(base_weight * imp * 5.0, 2) # Scale up for visibility
+
         if last_active > 30:
             factors.append({"factor": f"Engagement recency: {int(last_active)} days since last activity",
-                            "direction": "negative", "weight": round(min(last_active / 60, 1.0), 2)})
+                            "direction": "negative", "weight": _get_w("last_activity_days", min(last_active / 60, 1.0))})
         elif last_active >= 0:
             factors.append({"factor": f"Active engagement: {int(last_active)} days since last activity",
-                            "direction": "positive", "weight": round(min((30 - last_active) / 30, 1.0), 2)})
+                            "direction": "positive", "weight": _get_w("last_activity_days", min((30 - last_active) / 30, 1.0))})
+        
         if trend <= -0.1:
             factors.append({"factor": f"Usage trend declining {abs(trend) * 100:.0f}%",
-                            "direction": "negative", "weight": round(min(abs(trend) * 2, 1.0), 2)})
+                            "direction": "negative", "weight": _get_w("usage_trend", min(abs(trend) * 2, 1.0))})
         elif trend >= 0.05:
             factors.append({"factor": f"Usage trend growing {trend * 100:.0f}%",
-                            "direction": "positive", "weight": round(min(trend * 2, 1.0), 2)})
+                            "direction": "positive", "weight": _get_w("usage_trend", min(trend * 2, 1.0))})
+        
         if tickets > 10:
             factors.append({"factor": f"High support volume: {int(tickets)} open tickets",
-                            "direction": "negative", "weight": round(min(tickets / 20, 1.0), 2)})
+                            "direction": "negative", "weight": _get_w("ticket_count", min(tickets / 20, 1.0))})
+        
         if renewal <= 45:
             factors.append({"factor": f"Renewal imminent: {int(renewal)} days remaining",
-                            "direction": "negative", "weight": round(min((45 - renewal) / 45 + 0.3, 1.0), 2)})
+                            "direction": "negative", "weight": _get_w("renewal_in_days", min((45 - renewal) / 45 + 0.3, 1.0))})
+        
         if value >= 100000:
             factors.append({"factor": f"High-value contract (${value:,.0f})",
-                            "direction": "negative", "weight": 0.2})
+                            "direction": "negative", "weight": _get_w("contract_value", 0.2)})
 
         result = []
         for i, f in enumerate(factors):

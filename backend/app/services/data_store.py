@@ -41,9 +41,20 @@ def _model_to_dict(model) -> Dict[str, Any]:
 # Users
 # ---------------------------------------------------------------------------
 def get_user(email_or_id: str) -> Optional[Dict[str, Any]]:
+    """Look a user up by id or email.
+
+    Email matching is case-insensitive.  Registration lowercases addresses and
+    the seed CSVs are lowercase too, but login used to compare exactly, so
+    typing ``Admin@revops.pro`` silently produced "Incorrect username or
+    password" for an account that existed.
+    """
+    if email_or_id is None:
+        return None
+    key = email_or_id.strip()
     with get_session() as session:
         user = session.query(UserModel).filter(
-            (UserModel.id == email_or_id) | (UserModel.email == email_or_id)
+            (UserModel.id == key)
+            | (func.lower(UserModel.email) == key.lower())
         ).first()
         if user:
             return _model_to_dict(user)
